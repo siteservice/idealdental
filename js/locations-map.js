@@ -73,6 +73,8 @@ window.regions_mapping = {
   },
 };
 
+console.log(window.regions_mapping);
+
 const fetchUserLocation = async () => {
   try {
     const response = await fetch("https://geo-ip.rboone.workers.dev/");
