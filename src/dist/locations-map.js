@@ -1,44 +1,15 @@
-"use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-const mapbox_gl_1 = __importDefault(require("mapbox-gl"));
-const turf = __importStar(require("@turf/turf"));
-const points_within_polygon_1 = __importDefault(require("@turf/points-within-polygon"));
+import mapboxgl from "mapbox-gl";
+import * as turf from "@turf/turf";
+import pointsWithinPolygon from "@turf/points-within-polygon";
 window.regions_mapping = {
     "dallas-fort-worth": {
         inputValue: "Dallas-Fort Worth Metropolitan Area, TX, USA",
@@ -113,13 +84,13 @@ window.regions_mapping = {
         zoomLevel: 10,
     },
 };
-const fetchUserLocation = async () => {
+const fetchUserLocation = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const response = await fetch("https://geo-ip.rboone.workers.dev/");
+        const response = yield fetch("https://geo-ip.rboone.workers.dev/");
         if (!response.ok) {
             throw new Error("No network response");
         }
-        const data = await response.json();
+        const data = yield response.json();
         window.userLongLat = [
             parseFloat(data.longitude),
             parseFloat(data.latitude),
@@ -128,27 +99,32 @@ const fetchUserLocation = async () => {
     catch (error) {
         console.error("Error:", error);
     }
-};
+});
 fetchUserLocation();
-async function getPermission() {
-    try {
-        const result = await navigator.permissions.query({ name: "geolocation" });
-        return `${result.state}`;
-    }
-    catch (error) {
-        return `geolocation (not supported)`;
-    }
+function getPermission() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const result = yield navigator.permissions.query({ name: "geolocation" });
+            return `${result.state}`;
+        }
+        catch (error) {
+            return `geolocation (not supported)`;
+        }
+    });
 }
 let zoomLocAllowed = 8;
-async function checkPermission() {
-    const permissionStatus = await getPermission();
-    if (permissionStatus === "granted") {
-        zoomLocAllowed = 10;
-    }
+function checkPermission() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const permissionStatus = yield getPermission();
+        if (permissionStatus === "granted") {
+            zoomLocAllowed = 10;
+        }
+    });
 }
 checkPermission();
 //Mapbox Functionality
 function mapboxLocations() {
+    var _a, _b, _c, _d, _e;
     const isRegion = (key) => {
         return [
             "dallas-fort-worth",
@@ -172,7 +148,7 @@ function mapboxLocations() {
     const queryString = window.location.search;
     const urlParams = new URLSearchParams(queryString);
     if (urlParams.has("region")) {
-        const regionParam = urlParams.get("region")?.toLowerCase() || "";
+        const regionParam = ((_a = urlParams.get("region")) === null || _a === void 0 ? void 0 : _a.toLowerCase()) || "";
         if (isRegion(regionParam)) {
             region = regionParam;
         }
@@ -190,8 +166,8 @@ function mapboxLocations() {
         }
     }
     if (region && acceptedRegions.includes(region)) {
-        inputValue = window.regions_mapping[region]?.inputValue ?? "";
-        regionCoordinates = window.regions_mapping[region]?.regionCoordinates ?? [];
+        inputValue = (_c = (_b = window.regions_mapping[region]) === null || _b === void 0 ? void 0 : _b.inputValue) !== null && _c !== void 0 ? _c : "";
+        regionCoordinates = (_e = (_d = window.regions_mapping[region]) === null || _d === void 0 ? void 0 : _d.regionCoordinates) !== null && _e !== void 0 ? _e : [];
     }
     //Create GeoJSON
     window.locationsGeoJSON = window.locationsGeoJSON || {
@@ -225,8 +201,8 @@ function mapboxLocations() {
     const mapboxStyle = "mapbox://styles/nbaulisch/cly4o18ra00jc01qjf3tbbn6j";
     const accessToken = "pk.eyJ1IjoibmJhdWxpc2NoIiwiYSI6ImNseHA0MW8zbjBtdHUyaW9keGl3ajFkOGEifQ.l0dQFLRTvNxCCV7CYuIKbQ";
     const zoom = 4;
-    mapbox_gl_1.default.accessToken = accessToken;
-    const mapgl = new mapbox_gl_1.default.Map({
+    mapboxgl.accessToken = accessToken;
+    const mapgl = new mapboxgl.Map({
         container: "locations-map",
         style: mapboxStyle,
         center: [-96, 37.8],
@@ -241,13 +217,13 @@ function mapboxLocations() {
     mapgl.on("load", function () {
         mapgl.loadImage("https://cdn.prod.website-files.com/663a58dfb423eff3639562f6/6683102370a009e45238a05b_LocationPin.png", function (error, image) {
             if (error || !image) {
-                throw error ?? new Error("Image not loaded");
+                throw error !== null && error !== void 0 ? error : new Error("Image not loaded");
             }
             mapgl.addImage("locationsPin", image);
         });
         mapgl.loadImage("https://cdn.prod.website-files.com/663a58dfb423eff3639562f6/668310238fec6bce3551ebbe_LocationPinHover.png", function (error, image) {
             if (error || !image) {
-                throw error ?? new Error("Image not loaded");
+                throw error !== null && error !== void 0 ? error : new Error("Image not loaded");
             }
             mapgl.addImage("locationsPinHover", image);
         });
@@ -289,10 +265,10 @@ function mapboxLocations() {
                 "icon-allow-overlap": true,
             },
         });
-        mapgl.addControl(new mapbox_gl_1.default.NavigationControl({
+        mapgl.addControl(new mapboxgl.NavigationControl({
             showCompass: false,
         }));
-        mapgl.addControl(new mapbox_gl_1.default.GeolocateControl({
+        mapgl.addControl(new mapboxgl.GeolocateControl({
             positionOptions: {
                 enableHighAccuracy: true,
             },
@@ -365,7 +341,7 @@ function mapboxLocations() {
             return;
         const features = mapgl.querySourceFeatures("locations");
         const feature = features[0];
-        if (feature?.geometry.type === "Point") {
+        if ((feature === null || feature === void 0 ? void 0 : feature.geometry.type) === "Point") {
             const coords = feature.geometry.coordinates;
             mapgl.once("moveend", () => {
                 mapgl.setCenter(coords);
@@ -412,12 +388,13 @@ function mapboxLocations() {
     //     });
     // });
     mapgl.on("click", "locations-cluster-layer", (e) => {
+        var _a;
         const features = mapgl.queryRenderedFeatures(e.point, {
             layers: ["locations-cluster-layer"],
         });
         if (!features.length)
             return;
-        const clusterId = features[0].properties?.cluster_id;
+        const clusterId = (_a = features[0].properties) === null || _a === void 0 ? void 0 : _a.cluster_id;
         if (clusterId === undefined)
             return;
         const source = mapgl.getSource("locations");
@@ -428,7 +405,7 @@ function mapboxLocations() {
                 const coords = features[0].geometry.coordinates;
                 mapgl.flyTo({
                     center: coords,
-                    zoom: zoom ?? 10,
+                    zoom: zoom !== null && zoom !== void 0 ? zoom : 10,
                 });
             }
             else {
@@ -437,6 +414,7 @@ function mapboxLocations() {
         });
     });
     mapgl.on("click", "locations-nocluster-layer", (e) => {
+        var _a;
         const clickPoint = turf.point([e.lngLat.lng, e.lngLat.lat]);
         let nearestFeature;
         let minDistance = Infinity;
@@ -454,7 +432,7 @@ function mapboxLocations() {
             }
         });
         if (nearestFeature) {
-            const featureId = nearestFeature.properties?.id;
+            const featureId = (_a = nearestFeature.properties) === null || _a === void 0 ? void 0 : _a.id;
             mapgl.setFilter("locations-highlight-layer", ["==", "id", featureId]);
             $(".list-feature .office-card-wrapper").removeClass("active");
             let officeTo = $('.office-list-item[data-id="' + featureId + '"]');
@@ -668,7 +646,8 @@ function mapboxLocations() {
                     .css("border-top-left-radius", "16px")
                     .css("border-top-right-radius", "16px");
                 setTimeout(function () {
-                    locationsMap.css("height", `${(mapSection ? mapSection.height() ?? 0 : 0) + 16}px`);
+                    var _a;
+                    locationsMap.css("height", `${(mapSection ? (_a = mapSection.height()) !== null && _a !== void 0 ? _a : 0 : 0) + 16}px`);
                     mapToggleBtn.css("display", "block");
                     resizeMap();
                 }, 400);
@@ -694,7 +673,8 @@ function mapboxLocations() {
                     .css("border-top-left-radius", "16px")
                     .css("border-top-right-radius", "16px");
                 setTimeout(function () {
-                    locationsMap.css("height", `${(mapSection ? mapSection.height() ?? 0 : 0) + 16}px`);
+                    var _a;
+                    locationsMap.css("height", `${(mapSection ? (_a = mapSection.height()) !== null && _a !== void 0 ? _a : 0 : 0) + 16}px`);
                     mapToggleBtn.css("display", "block");
                     resizeMap();
                 }, 400);
@@ -715,10 +695,12 @@ function mapboxLocations() {
         isHidden = !isHidden;
     });
     mapViewBtn.on("click", function () {
+        var _a;
         if (viewportWidth > 767 && viewportWidth < 992) {
             mapSection.animate({ height: "665px" }, 400);
             setTimeout(function () {
-                locationsMap.css("height", `${(mapSection ? mapSection.height() ?? 0 : 0) + 16}px`);
+                var _a;
+                locationsMap.css("height", `${(mapSection ? (_a = mapSection.height()) !== null && _a !== void 0 ? _a : 0 : 0) + 16}px`);
                 mapToggleBtn.css("display", "block");
                 resizeMap();
             }, 401);
@@ -726,7 +708,8 @@ function mapboxLocations() {
         if (viewportWidth < 768) {
             mapSection.animate({ height: "390px" }, 400);
             setTimeout(function () {
-                locationsMap.css("height", `${(mapSection ? mapSection.height() ?? 0 : 0) + 16}px`);
+                var _a;
+                locationsMap.css("height", `${(mapSection ? (_a = mapSection.height()) !== null && _a !== void 0 ? _a : 0 : 0) + 16}px`);
                 mapToggleBtn.css("display", "block");
                 resizeMap();
             }, 401);
@@ -734,7 +717,7 @@ function mapboxLocations() {
         var mapview = $(this).attr("href");
         if (mapview) {
             const target = $(mapview);
-            const offsetTop = target.offset()?.top;
+            const offsetTop = (_a = target.offset()) === null || _a === void 0 ? void 0 : _a.top;
             if (offsetTop !== undefined) {
                 $("html,body").animate({ scrollTop: offsetTop }, "slow");
             }
@@ -743,16 +726,17 @@ function mapboxLocations() {
         return false;
     });
     offices_wrapper.on("scroll", function () {
+        var _a, _b, _c, _d;
         if (viewportWidth < 992) {
             const $this = $(this);
-            const scrollTop = $this.scrollTop() ?? 0;
-            const innerHeight = $this.innerHeight() ?? 0;
-            const scrollHeight = $this[0]?.scrollHeight ?? 0;
+            const scrollTop = (_a = $this.scrollTop()) !== null && _a !== void 0 ? _a : 0;
+            const innerHeight = (_b = $this.innerHeight()) !== null && _b !== void 0 ? _b : 0;
+            const scrollHeight = (_d = (_c = $this[0]) === null || _c === void 0 ? void 0 : _c.scrollHeight) !== null && _d !== void 0 ? _d : 0;
             if (scrollTop + innerHeight >= scrollHeight) {
-                map_view_placeholder?.css("display", "none");
+                map_view_placeholder === null || map_view_placeholder === void 0 ? void 0 : map_view_placeholder.css("display", "none");
             }
             else {
-                map_view_placeholder?.css("display", "flex");
+                map_view_placeholder === null || map_view_placeholder === void 0 ? void 0 : map_view_placeholder.css("display", "flex");
             }
         }
     });
@@ -763,7 +747,8 @@ function mapboxLocations() {
                 mapSection.animate({ height: "580px" }, 400);
                 offices_wrapper.animate({ height: "285px" }, 400);
                 setTimeout(function () {
-                    locationsMap.css("height", `${(mapSection ? mapSection.height() ?? 0 : 0) + 16}px`);
+                    var _a;
+                    locationsMap.css("height", `${(mapSection ? (_a = mapSection.height()) !== null && _a !== void 0 ? _a : 0 : 0) + 16}px`);
                     resizeMap();
                 }, 401);
             }
@@ -771,7 +756,8 @@ function mapboxLocations() {
                 mapSection.animate({ height: "670px" }, 400);
                 offices_wrapper.animate({ height: "0px" }, 400);
                 setTimeout(function () {
-                    locationsMap.css("height", `${(mapSection ? mapSection.height() ?? 0 : 0) + 16}px`);
+                    var _a;
+                    locationsMap.css("height", `${(mapSection ? (_a = mapSection.height()) !== null && _a !== void 0 ? _a : 0 : 0) + 16}px`);
                     resizeMap();
                 }, 401);
             }
@@ -781,7 +767,8 @@ function mapboxLocations() {
                 mapSection.animate({ height: "390px" }, 400);
                 offices_wrapper.animate({ height: "195px" }, 400);
                 setTimeout(function () {
-                    locationsMap.css("height", `${(mapSection ? mapSection.height() ?? 0 : 0) + 16}px`);
+                    var _a;
+                    locationsMap.css("height", `${(mapSection ? (_a = mapSection.height()) !== null && _a !== void 0 ? _a : 0 : 0) + 16}px`);
                     resizeMap();
                 }, 401);
             }
@@ -790,7 +777,8 @@ function mapboxLocations() {
                 mapSection.animate({ height: "580px" }, 400);
                 offices_wrapper.animate({ height: "0px" }, 400);
                 setTimeout(function () {
-                    locationsMap.css("height", `${(mapSection ? mapSection.height() ?? 0 : 0) + 16}px`);
+                    var _a;
+                    locationsMap.css("height", `${(mapSection ? (_a = mapSection.height()) !== null && _a !== void 0 ? _a : 0 : 0) + 16}px`);
                     resizeMap();
                 }, 401);
             }
@@ -802,7 +790,8 @@ function mapboxLocations() {
                     mapSection.animate({ height: "195px" }, 400);
                     offices_wrapper.animate({ height: "495px" }, 400);
                     setTimeout(function () {
-                        locationsMap.css("height", `${(mapSection ? mapSection.height() ?? 0 : 0) + 16}px`);
+                        var _a;
+                        locationsMap.css("height", `${(mapSection ? (_a = mapSection.height()) !== null && _a !== void 0 ? _a : 0 : 0) + 16}px`);
                         resizeMap();
                     }, 401);
                 }
@@ -812,7 +801,8 @@ function mapboxLocations() {
                     offices_wrapper.animate({ height: "16px" }, 400);
                     map_view_placeholder.hide();
                     setTimeout(function () {
-                        locationsMap.css("height", `${(mapSection ? mapSection.height() ?? 0 : 0) + 16}px`);
+                        var _a;
+                        locationsMap.css("height", `${(mapSection ? (_a = mapSection.height()) !== null && _a !== void 0 ? _a : 0 : 0) + 16}px`);
                         resizeMap();
                     }, 401);
                 }
@@ -872,7 +862,7 @@ function mapboxLocations() {
             type: "FeatureCollection",
             features: filteredFeatures,
         };
-        const visibleFeatures = (0, points_within_polygon_1.default)(pointFeatureCollection, searchArea);
+        const visibleFeatures = pointsWithinPolygon(pointFeatureCollection, searchArea);
         const sortedVisibleFeatures = visibleFeatures.features;
         if (window.userSearchLongLat === undefined) {
             const from = turf.point(center);
