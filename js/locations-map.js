@@ -1241,4 +1241,4 @@ function mapboxLocations() {
   );
 }
 
-document.addEventListener("DOMContentLoaded", mapboxLocations);
+window.addEventListener('load', mapboxLocations)
