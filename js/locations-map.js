@@ -35,6 +35,12 @@ window.regions_mapping = {
     forceCoordinates: false,
     zoomLevel: 10,
   },
+  charlotte: {
+    inputValue: "Charlotte, NC, USA",
+    regionCoordinates: [35.22104138684506, -80.84447687795576],
+    forceCoordinates: false,
+    zoomLevel: 10,
+  },
   "north-carolina": {
     inputValue: "North Carolina, USA",
     regionCoordinates: [35.732535987200706, -79.43499217414373],
@@ -1241,4 +1247,4 @@ function mapboxLocations() {
   );
 }
 
-window.addEventListener('load', mapboxLocations)
+window.addEventListener("load", mapboxLocations);
