@@ -39,7 +39,7 @@ window.regions_mapping = {
     inputValue: "Charlotte, NC, USA",
     regionCoordinates: [35.22104138684506, -80.84447687795576],
     forceCoordinates: false,
-    zoomLevel: 10,
+    zoomLevel: 9,
   },
   "north-carolina": {
     inputValue: "North Carolina, USA",
