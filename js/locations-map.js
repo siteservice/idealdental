@@ -649,8 +649,8 @@ function mapboxLocations() {
 
   const offices_wrapper = $(".list-feature");
   const dragger = $(".dragger");
-  const map_view_placeholder = $(".map-view-placeholder");
-  const mapViewBtn = $(".map-view-btn");
+  // const map_view_placeholder = $(".map-view-placeholder");
+  // const mapViewBtn = $(".map-view-btn");
   const mapSection = $(".location-map-section");
   const locationsMap = $(".locations-map-wrapper");
   const mapToggleBtn = $(".map-toggle-btn");
@@ -663,7 +663,7 @@ function mapboxLocations() {
   let searchMode = false;
   let modalShown = false;
 
-  map_view_placeholder.hide();
+  // map_view_placeholder.hide();
   if (viewportWidth < 992) {
     footer.hide();
   }
@@ -733,45 +733,45 @@ function mapboxLocations() {
     isHidden = !isHidden;
   });
 
-  mapViewBtn.on("click", function () {
-    if (viewportWidth > 767 && viewportWidth < 992) {
-      mapSection.animate({ height: "665px" }, 400);
-      setTimeout(function () {
-        locationsMap.css("height", mapSection.height() + 16 + "px");
-        mapToggleBtn.css("display", "block");
-        resizeMap();
-      }, 401);
-    }
-    if (viewportWidth < 768) {
-      mapSection.animate({ height: "390px" }, 400);
-      setTimeout(function () {
-        locationsMap.css("height", mapSection.height() + 16 + "px");
-        mapToggleBtn.css("display", "block");
-        resizeMap();
-      }, 401);
-    }
+  // mapViewBtn.on("click", function () {
+  //   if (viewportWidth > 767 && viewportWidth < 992) {
+  //     mapSection.animate({ height: "665px" }, 400);
+  //     setTimeout(function () {
+  //       locationsMap.css("height", mapSection.height() + 16 + "px");
+  //       mapToggleBtn.css("display", "block");
+  //       resizeMap();
+  //     }, 401);
+  //   }
+  //   if (viewportWidth < 768) {
+  //     mapSection.animate({ height: "390px" }, 400);
+  //     setTimeout(function () {
+  //       locationsMap.css("height", mapSection.height() + 16 + "px");
+  //       mapToggleBtn.css("display", "block");
+  //       resizeMap();
+  //     }, 401);
+  //   }
 
-    var mapview = $(this).attr("href");
-    $("html,body").animate({ scrollTop: $(mapview).offset().top }, "slow");
-    isHidden = !isHidden;
-    return false;
-  });
+  //   var mapview = $(this).attr("href");
+  //   $("html,body").animate({ scrollTop: $(mapview).offset().top }, "slow");
+  //   isHidden = !isHidden;
+  //   return false;
+  // });
 
-  offices_wrapper.on("scroll", function () {
-    if (viewportWidth < 992) {
-      if (
-        $(this).scrollTop() + $(this).innerHeight() >=
-        $(this)[0].scrollHeight
-      ) {
-        map_view_placeholder.css("display", "none");
-      } else {
-        map_view_placeholder.css("display", "flex");
-      }
-    }
-  });
+  // offices_wrapper.on("scroll", function () {
+  //   if (viewportWidth < 992) {
+  //     if (
+  //       $(this).scrollTop() + $(this).innerHeight() >=
+  //       $(this)[0].scrollHeight
+  //     ) {
+  //       map_view_placeholder.css("display", "none");
+  //     } else {
+  //       map_view_placeholder.css("display", "flex");
+  //     }
+  //   }
+  // });
 
   mapToggleBtn.on("click", function () {
-    map_view_placeholder.hide();
+    // map_view_placeholder.hide();
     if (viewportWidth > 767 && viewportWidth < 992) {
       if (isExpanded) {
         mapSection.animate({ height: "580px" }, 400);
@@ -825,7 +825,7 @@ function mapboxLocations() {
           // Animate heights for the "expanded" state
           mapSection.animate({ height: "650px" }, 400);
           offices_wrapper.animate({ height: "16px" }, 400);
-          map_view_placeholder.hide();
+          // map_view_placeholder.hide();
           setTimeout(function () {
             locationsMap.css("height", mapSection.height() + 16 + "px");
             resizeMap();
