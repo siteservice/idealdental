@@ -816,7 +816,7 @@ function mapboxLocations() {
       if (viewportWidth < 768) {
         if (isExpanded) {
           mapSection.animate({ height: "195px" }, 400);
-          offices_wrapper.animate({ height: "495px" }, 400);
+          // offices_wrapper.animate({ height: "495px" }, 400);
           setTimeout(function () {
             locationsMap.css("height", mapSection.height() + 16 + "px");
             resizeMap();
@@ -1070,7 +1070,7 @@ function mapboxLocations() {
     if (viewportWidth < 768) {
       mapSection.css("height", "205px");
       locationsMap.css("height", "221px");
-      offices_wrapper.css("height", "495px");
+      // offices_wrapper.css("height", "495px");
       resizeMap();
     }
 
