@@ -1064,7 +1064,7 @@ function mapboxLocations() {
     if (viewportWidth < 992) {
       mapSection.css("height", "265px");
       locationsMap.css("height", "281px");
-      offices_wrapper.css("height", "445px");
+      // offices_wrapper.css("height", "445px");
       resizeMap();
     }
     if (viewportWidth < 768) {
