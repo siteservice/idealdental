@@ -1,3 +1,39 @@
+var isThreeStepForm = ["6754"].includes(
+  "{{wf {&quot;path&quot;:&quot;locations:jarvis-scheduler-office-id&quot;,&quot;type&quot;:&quot;PlainText&quot;} }}"
+);
+$(document).ready(function () {
+  const email =
+    `{{wf {&quot;path&quot;:&quot;locations:office-email&quot;,&quot;type&quot;:&quot;Email&quot;\} }}`.replace(
+      "@",
+      "|"
+    );
+  $("#Location-Email").val(email);
+});
+var new_layout = ["/uptown"];
+var is_new_layout = new_layout.includes(
+  "{{wf {&quot;path&quot;:&quot;locations:test-link&quot;,&quot;type&quot;:&quot;Link&quot;} }}"
+);
+// get variant query param
+const urlParams = new URLSearchParams(window.location.search);
+const variant = urlParams.has("variant") || urlParams.has("confirmation");
+if (!variant) {
+  //if variant or confirmation are there
+  is_new_layout = false;
+}
+if (urlParams.get("confirmation")) {
+  const urlObj = new URL(window.location.href);
+  urlObj.searchParams.delete("confirmation");
+  urlObj.searchParams.set("variant", 1);
+  window.history.pushState({}, "", urlObj.toString());
+}
+if (is_new_layout) {
+  document
+    .querySelector("body")
+    .classList.add(
+      "{{wf {&quot;path&quot;:&quot;slug&quot;,&quot;type&quot;:&quot;PlainText&quot;} }}"
+    );
+}
+
 function onShadowReady(root, selector, callback) {
   const existing = root.querySelector(selector);
   if (existing) return callback(existing);
