@@ -1,4 +1,22 @@
 window.regions_mapping = {
+  atlanta: {
+    inputValue: "Alanta, GA, USA",
+    regionCoordinates: [33.749660098077506, -84.3965202473269],
+    forceCoordinates: false,
+    zoomLevel: 10,
+  },
+  austin: {
+    inputValue: "Austin, TX, USA",
+    regionCoordinates: [-97.7431, 30.2672],
+    forceCoordinates: false,
+    zoomLevel: 10,
+  },
+  charlotte: {
+    inputValue: "Charlotte, NC, USA",
+    regionCoordinates: [35.22104138684506, -80.84447687795576],
+    forceCoordinates: false,
+    zoomLevel: 9,
+  },
   "dallas-fort-worth": {
     inputValue: "Dallas-Fort Worth Metropolitan Area, TX, USA",
     regionCoordinates: [-96.9209135, 32.7078751],
@@ -11,35 +29,17 @@ window.regions_mapping = {
     forceCoordinates: false,
     zoomLevel: 9,
   },
-  "san-antonio": {
-    inputValue: "San Antonio, TX, USA",
-    regionCoordinates: [-98.5986018, 29.4315263], //[-98.5420483, 29.4360571],//[-98.4936, 29.4241],
-    forceCoordinates: true,
-    zoomLevel: 11,
-  },
-  austin: {
-    inputValue: "Austin, TX, USA",
-    regionCoordinates: [-97.7431, 30.2672],
+  jacksonville: {
+    inputValue: "Jacksonville, FL, USA",
+    regionCoordinates: [30.326618468170558, -81.65083466246286],
     forceCoordinates: false,
-    zoomLevel: 10,
-  },
-  atlanta: {
-    inputValue: "Alanta, GA, USA",
-    regionCoordinates: [33.749660098077506, -84.3965202473269],
-    forceCoordinates: false,
-    zoomLevel: 10,
+    zoomLevel: 9,
   },
   nashville: {
     inputValue: "Nashville, TN, USA",
     regionCoordinates: [36.164356171293186, -86.79476957517893],
     forceCoordinates: false,
     zoomLevel: 10,
-  },
-  charlotte: {
-    inputValue: "Charlotte, NC, USA",
-    regionCoordinates: [35.22104138684506, -80.84447687795576],
-    forceCoordinates: false,
-    zoomLevel: 9,
   },
   "north-carolina": {
     inputValue: "North Carolina, USA",
@@ -58,6 +58,12 @@ window.regions_mapping = {
     regionCoordinates: [33.44938371554326, -112.09258454784829],
     forceCoordinates: false,
     zoomLevel: 10,
+  },
+  "san-antonio": {
+    inputValue: "San Antonio, TX, USA",
+    regionCoordinates: [-98.5986018, 29.4315263], //[-98.5420483, 29.4360571],//[-98.4936, 29.4241],
+    forceCoordinates: true,
+    zoomLevel: 11,
   },
   seattle: {
     inputValue: "Seattle, WA, USA",
