@@ -1,3 +1,22 @@
+(function () {
+  function loadJarvisScript(callback) {
+    var script = document.createElement("script");
+    script.src = "https://schedule.jarvisanalytics.com/js/init.min.js";
+    script.defer = true;
+    script.onload = callback;
+    document.head.appendChild(script);
+  }
+
+  // Your init function (what you currently call `load_jarvis`)
+  function initJarvis() {
+    console.log("Jarvis script loaded, now running init...");
+    // 🔽 Your initialization code here
+  }
+
+  // Load the Jarvis script first, then run your init
+  loadJarvisScript(initJarvis);
+})();
+
 var isThreeStepForm = ["6754"].includes(
   "{{wf {&quot;path&quot;:&quot;locations:jarvis-scheduler-office-id&quot;,&quot;type&quot;:&quot;PlainText&quot;} }}"
 );
