@@ -1,47 +1,3 @@
-<!-- New Code but not working -->
-<script src="https://cdn.jsdelivr.net/gh/siteservice/idealdental@main/js/book-appointment-by-locations.js"></script>
-
-<script
-  defer
-  src="https://schedule.jarvisanalytics.com/js/init.min.js"
-  onload="load_jarvis();"
-></script>
-
-</script>
-
-<style>
-  #next-button-sticky {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  #back-button-sticky-mobile,
-  #back-button-sticky {
-    opacity: 0;
-  }
-
-  /*
-    #local-footer-container{
-      z-index: 51 !important; /* to be on top of the jarvis modal */
-  /*}*/
-</style>
-
-<script src="https://fengyuanchen.github.io/datepicker/js/datepicker.js"></script>
-
-<script>
-  $(document).ready(function () {
-    $('[data-toggle="datepicker"]').datepicker({
-      format: "mm-dd-yyyy",
-      startDate: new Date(),
-    });
-    if (window.innerWidth < 768) {
-      $('[data-toggle="datepicker"]').attr("readonly", "readonly");
-    }
-  });
-</script>
-
-
-<!-- Current Code -->
 <script
   defer
   src="https://schedule.jarvisanalytics.com/js/init.min.js"
@@ -263,6 +219,8 @@
           },
         });
 
+        const winShadowRoot = window.$shedulerShadowRoot;
+
         /* end of interception */
         //var canUpdatePhoneNumberListener = isThreeStepForm || false; //onThreestep form, we can update the phonenumber listener at start
         var canObservePolicyRadio = isThreeStepForm || false;
@@ -284,14 +242,15 @@
               console.log("Attempting to prefill comment");
               const comment = getCommentFromURL();
               if (
-                window.$shedulerShadowRoot.querySelector("textarea") &&
+                winShadowRoot.querySelector("textarea") &&
                 comment &&
-                window.$shedulerShadowRoot
+                winShadowRoot
               ) {
                 console.log("Comment:", comment);
-                $(window.$shedulerShadowRoot.querySelector("textarea")).val(
-                  `Offer: ${comment}`
-                );
+                const textarea = winShadowRoot.querySelector("textarea");
+                if (textarea) {
+                  textarea.value = `Offer: ${comment}`;
+                }
               }
 
               // Attach
@@ -332,7 +291,6 @@
         window.jarvis.colors.availabilityColumnHeaderColor = "#767F87";
         window.jarvis.colors.nearestCardColumnHeaderBackground = "#EEF2F6";
         window.jarvis.colors.nearestCardColumnHeaderColor = "#767F87";
-
         //window.jarvis.onSubmittedhandlers.push(function () {
         //console.log("submitted");
         //});
@@ -340,71 +298,116 @@
           //console.log("booked")
           // run after 100ms just to be safe and the DOM is in place
           setTimeout(() => {
-            $(
-              window.$shedulerShadowRoot.querySelector(
-                "#app > div.flex.flex-col.flex-grow.mt-6 > div.flex.flex-col.flex-grow > div > div > div"
-              )
-            ).css({
-              visibility: "hidden",
-              margin: "64px 16px",
-              "max-width": "396px",
-              width: "auto",
-            });
+            const el = winShadowRoot.querySelector(
+              "#app > div.flex.flex-col.flex-grow.mt-6 > div.flex.flex-col.flex-grow > div > div > div"
+            );
+
+            if (el) {
+              el.style.visibility = "hidden";
+              el.style.margin = "64px 16px";
+              el.style.maxWidth = "396px";
+              el.style.width = "auto";
+            }
 
             window.$shedulerShadowRoot.appendChild(buttonArrowStyle);
 
-            /* update success modal text */
-            $(
-              window.$shedulerShadowRoot.querySelector(
-                "#app > div.flex.flex-col.flex-grow.mt-6 > div.flex.flex-col.flex-grow > div > div > div > p:nth-child(3)"
-              )
-            ).text(
-              "Confirm your appointment within the next 90 minutes to secure your spot."
+            const p3 = root.querySelector(
+              "#app > div.flex.flex-col.flex-grow.mt-6 > div.flex.flex-col.flex-grow > div > div > div > p:nth-child(3)"
             );
-            $(
-              window.$shedulerShadowRoot.querySelector(
-                "#app > div.flex.flex-col.flex-grow.mt-6 > div.flex.flex-col.flex-grow > div > div > div > p:nth-child(4)"
-              )
-            ).text("We've sent an email and text to:");
-            $(
-              window.$shedulerShadowRoot.querySelector(
-                "#app>div.flex.flex.flex-col.flex-grow.mt-6>div.flex.flex-col.flex-grow>div>div>div>h3"
-              )
-            ).text("Last step!");
+            if (p3)
+              p3.textContent =
+                "Confirm your appointment within the next 90 minutes to secure your spot.";
+
+            const p4 = root.querySelector(
+              "#app > div.flex.flex-col.flex-grow.mt-6 > div.flex.flex-col.flex-grow > div > div > div > p:nth-child(4)"
+            );
+            if (p4) p4.textContent = "We've sent an email and text to:";
+
+            const h3 = root.querySelector(
+              "#app>div.flex.flex-col.flex-grow.mt-6>div.flex.flex-col.flex-grow>div>div>div>h3"
+            );
+            if (h3) h3.textContent = "Last step!";
             /* end update success modal text */
 
             /* update phone number in success modal */
-            $(
-              window.$shedulerShadowRoot.querySelector(
-                "#app > div.flex.flex-col.flex-grow.mt-6 > div.flex.flex-col.flex-grow > div > div > div > p.text-lg.md\\:text-2xl"
-              )
-            ).after(
-              `<p class="phone-number text-lg md:text-2xl">${phoneNumber}</p>`
+            const phoneTarget = root.querySelector(
+              "#app > div.flex.flex-col.flex-grow.mt-6 > div.flex.flex-col.flex-grow > div > div > div > p.text-lg.md\\:text-2xl"
             );
+            if (phoneTarget) {
+              phoneTarget.insertAdjacentHTML(
+                "afterend",
+                `<p class="phone-number text-lg md:text-2xl">${phoneNumber}</p>`
+              );
+            }
             /* end update phone number in success modal */
 
-            $(".book-an-appointment-container").css(
-              "padding",
-              "0px 0px 0px 0px"
+            /* .book-an-appointment-container { padding: 0 } */
+            document
+              .querySelectorAll(".book-an-appointment-container")
+              .forEach((el) => {
+                el.style.padding = "0px 0px 0px 0px";
+              });
+
+            /* hide multiple selectors */
+            document
+              .querySelectorAll(
+                ".book-an-appointement-container-mobile, .office-info-mobile, .white-bg-left.desktop"
+              )
+              .forEach((el) => {
+                el.style.display = "none";
+              });
+
+            /* change background color */
+            document
+              .querySelectorAll(
+                ".book-an-appointment-main, .book-an-appointement-bg-wrapper, body"
+              )
+              .forEach((el) => {
+                el.style.backgroundColor = "#6AC64B";
+              });
+
+            /* .book-an-appointement-bg-wrapper { padding: 0 } */
+            document
+              .querySelectorAll(".book-an-appointement-bg-wrapper")
+              .forEach((el) => {
+                el.style.padding = "0";
+              });
+
+            const targetNode = document.getElementById("insurance");
+
+            if (targetNode) {
+              const observer = new MutationObserver((mutations) => {
+                mutations.forEach(() => {
+                  const ul = targetNode.querySelector("ul");
+                  if (ul) {
+                    ul.style.overflow = "auto";
+                    ul.style.height = "200px";
+                    observer.disconnect(); // stop observing once done
+                  }
+                });
+              });
+
+              observer.observe(targetNode, { childList: true, subtree: true });
+            }
+
+            /* hide success modal container */
+            const container = root.querySelector(
+              "#app > div.flex.flex-col.flex-grow.mt-6 > div.container.mx-auto"
             );
-            $(
-              ".book-an-appointement-container-mobile, .office-info-mobile, .white-bg-left.desktop"
-            ).hide();
-            $(
-              ".book-an-appointment-main, .book-an-appointement-bg-wrapper, body"
-            ).css("background-color", "#6AC64B");
-            $(".book-an-appointement-bg-wrapper").css("padding", "0");
-            $(
-              window.$shedulerShadowRoot.querySelector(
-                "#app > div.flex.flex-col.flex-grow.mt-6 > div.container.mx-auto"
-              )
-            ).hide();
-            $(".book-an-appointment-main").css("width", "100%");
-            $(
-              window.$shedulerShadowRoot.querySelector(
-                "#app > div.flex.flex-col.flex-grow.mt-6 > div.flex.flex-col.flex-grow > div > div > div"
-              )
-            ).css("visibility", "visible");
+            if (container) container.style.display = "none";
+
+            /* .book-an-appointment-main { width: 100% } */
+            document
+              .querySelectorAll(".book-an-appointment-main")
+              .forEach((el) => {
+                el.style.width = "100%";
+              });
+
+            /* make the success modal visible */
+            const modal = root.querySelector(
+              "#app > div.flex.flex-col.flex-grow.mt-6 > div.flex.flex-col.flex-grow > div > div > div"
+            );
+            if (modal) modal.style.visibility = "visible";
           }, 100);
         });
         window.jarvis.onloadhandlers.push(function () {
@@ -420,12 +423,24 @@
           }
         });
 
-        $("#wf-back-button-mobile").attr("onclick", "jarvisGoBack()");
-        $("#back-button-sticky-mobile").attr("onclick", "jarvisGoBack()");
-        $("#back-button-sticky").attr("onclick", "jarvisGoBack()");
-        $("#next-button-sticky").click(function () {
-          window.$shedulerShadowRoot.querySelector(".continue-btn").click();
-        });
+        document
+          .querySelector("#wf-back-button-mobile")
+          ?.setAttribute("onclick", "jarvisGoBack()");
+
+        document
+          .querySelector("#back-button-sticky-mobile")
+          ?.setAttribute("onclick", "jarvisGoBack()");
+
+        document
+          .querySelector("#back-button-sticky")
+          ?.setAttribute("onclick", "jarvisGoBack()");
+
+        document
+          .querySelector("#next-button-sticky")
+          ?.addEventListener("click", () => {
+            winShadowRoot.querySelector(".continue-btn")?.click();
+          });
+
         window.addEventListener("load", async function () {
           try {
             const jarvis_location = document.querySelector("#jarvis-location");
@@ -614,6 +629,11 @@
                               width: 100% !important;
                           }
 
+                          #app #insurance ul {
+                            height: 180px;
+                            overflow: auto;
+                          }
+
                         `;
             if (is_new_layout) {
               style.textContent += `
@@ -660,13 +680,13 @@
             }
             window.$shedulerShadowRoot.appendChild(style);
 
-            var hasUpdatedText = false;
+            // var hasUpdatedText = false;
             var hasAddedContinueBtn = false;
-            var hasChangedForm1 = false;
-            var hasChangedForm2 = false;
-            var hasChangedForm3 = false;
+            // var hasChangedForm1 = false;
+            // var hasChangedForm2 = false;
+            // var hasChangedForm3 = false;
             var hasAddedBackBtn = false;
-            var hasAddedPhoneNumber = false;
+            // var hasAddedPhoneNumber = false;
             var hasClosedAvailDropdown = false;
 
             const script = document.createElement("script");
@@ -740,289 +760,269 @@
                       }
                     );
 
+                    const winShadowRoot = window.$shedulerShadowRoot;
+
                     if (
                       !isThreeStepForm &&
                       !window.$shedulerShadowRoot.querySelector(
                         ".separator-line"
                       )
                     ) {
-                      $(
-                        window.$shedulerShadowRoot.querySelector(
-                          "#app > div.flex.flex-col.flex-grow.mt-6 > div > div > div.flex.justify-center > a:nth-child(1)"
-                        )
-                      ).after("<div class='separator-line'></div>");
-                    }
-
-                    if (
-                      isThreeStepForm &&
-                      window.$shedulerShadowRoot.querySelector(
-                        "#app>div.flex.flex-col.flex-grow.mt-6>div>div>div.flex.justify-center"
-                      ) &&
-                      !window.$shedulerShadowRoot.querySelector(
-                        ".separator-line-3steps-1"
-                      )
-                    ) {
-                      $(
-                        window.$shedulerShadowRoot.querySelector(
-                          "#app > div.flex.flex-col.flex-grow.mt-6 > div > div > div.flex.justify-center > a:nth-child(2)"
-                        )
-                      )
-                        .after("<div class='separator-line-3steps-2'></div>")
-                        .before("<div class='separator-line-3steps-1'></div>");
-                      window.$shedulerShadowRoot.querySelector(
-                        "#app>div.flex.flex-col.flex-grow.mt-6>div>div>div.flex.justify-center"
-                      ).style.alignItems = "baseline";
-                    }
-
-                    if (
-                      window.$shedulerShadowRoot.querySelector(
-                        "#app > div.flex.flex-col.flex-grow.mt-6 > div > div"
-                      ) &&
-                      !hasAddedContinueBtn
-                    ) {
-                      $(
-                        window.$shedulerShadowRoot.querySelector(
-                          "#app > div.flex.flex-col.flex-grow.mt-6 > div > div"
-                        )
-                      ).append(
-                        "<div class='flex items-center'><button onclick='continueAction()' class='continue-btn'>Continue</button></div>"
+                      const link = winShadowRoot.querySelector(
+                        "#app > div.flex.flex-col.flex-grow.mt-6 > div > div > div.flex.justify-center > a:nth-child(1)"
                       );
-                      hasAddedContinueBtn = true;
-                    }
 
-                    if (
-                      window.$shedulerShadowRoot.querySelector(
-                        "#app > div.flex.flex-col.flex-grow.mt-6 > form > div.z-50.flex-grow.py-6.mt-6.bg-color.shadow-2xl > div > div > button"
-                      )
-                    ) {
-                      if (
-                        window.$shedulerShadowRoot.querySelector(
-                          "#app > div.flex.flex-col.flex-grow.mt-6 > form > div.z-50.flex-grow.py-6.mt-6.bg-color.shadow-2xl > div > div > button"
-                        ).textContent == " Next "
-                      ) {
-                        window.$shedulerShadowRoot.querySelector(
-                          ".continue-btn"
-                        ).textContent = "Next";
-                        $("#next-button-sticky").text("Next");
-                      } else {
-                        window.$shedulerShadowRoot.querySelector(
-                          ".continue-btn"
-                        ).textContent = isThreeStepForm
-                          ? "Submit"
-                          : "Book Appointment";
-                        $("#next-button-sticky").text(
-                          isThreeStepForm ? "Submit" : "Book Appointment"
+                      if (link) {
+                        link.insertAdjacentHTML(
+                          "afterend",
+                          "<div class='separator-line'></div>"
                         );
                       }
                     }
 
                     if (
-                      window.$shedulerShadowRoot.querySelector(
+                      isThreeStepForm &&
+                      winShadowRoot.querySelector(
+                        "#app>div.flex.flex-col.flex-grow.mt-6>div>div>div.flex.justify-center"
+                      ) &&
+                      !winShadowRoot.querySelector(".separator-line-3steps-1")
+                    ) {
+                      const link = winShadowRoot.querySelector(
+                        "#app > div.flex.flex-col.flex-grow.mt-6 > div > div > div.flex.justify-center > a:nth-child(2)"
+                      );
+
+                      if (link) {
+                        link.insertAdjacentHTML(
+                          "afterend",
+                          "<div class='separator-line-3steps-2'></div>"
+                        );
+                        link.insertAdjacentHTML(
+                          "beforebegin",
+                          "<div class='separator-line-3steps-1'></div>"
+                        );
+                      }
+
+                      const container = winShadowRoot.querySelector(
+                        "#app>div.flex.flex-col.flex-grow.mt-6>div>div>div.flex.justify-center"
+                      );
+                      if (container) {
+                        container.style.alignItems = "baseline";
+                      }
+                    }
+
+                    if (
+                      winShadowRoot.querySelector(
+                        "#app > div.flex.flex-col.flex-grow.mt-6 > div > div"
+                      ) &&
+                      !hasAddedContinueBtn
+                    ) {
+                      const container = winShadowRoot.querySelector(
+                        "#app > div.flex.flex-col.flex-grow.mt-6 > div > div"
+                      );
+
+                      if (container) {
+                        container.insertAdjacentHTML(
+                          "beforeend",
+                          "<div class='flex items-center'><button onclick='continueAction()' class='continue-btn'>Continue</button></div>"
+                        );
+                      }
+                      hasAddedContinueBtn = true;
+                    }
+
+                    const nextButton = winShadowRoot.querySelector(
+                      "#next-button-sticky"
+                    );
+
+                    if (
+                      winShadowRoot.querySelector(
+                        "#app > div.flex.flex-col.flex-grow.mt-6 > form > div.z-50.flex-grow.py-6.mt-6.bg-color.shadow-2xl > div > div > button"
+                      )
+                    ) {
+                      if (
+                        winShadowRoot.querySelector(
+                          "#app > div.flex.flex-col.flex-grow.mt-6 > form > div.z-50.flex-grow.py-6.mt-6.bg-color.shadow-2xl > div > div > button"
+                        ).textContent == " Next "
+                      ) {
+                        winShadowRoot.querySelector(
+                          ".continue-btn"
+                        ).textContent = "Next";
+
+                        if (nextButton) {
+                          nextButton.textContent = "Next";
+                        }
+                      } else {
+                        winShadowRoot.querySelector(
+                          ".continue-btn"
+                        ).textContent = isThreeStepForm
+                          ? "Submit"
+                          : "Book Appointment";
+
+                        if (nextButton) {
+                          nextButton.textContent = isThreeStepForm
+                            ? "Submit"
+                            : "Book Appointment";
+                        }
+                      }
+                    }
+
+                    if (
+                      winShadowRoot.querySelector(
                         'form > div.z-50.flex-grow.py-6.mt-6.bg-color.shadow-2xl > div > div > button[disabled="disabled"]'
                       )
                     ) {
-                      $("#next-button-sticky").css({
-                        opacity: "0.5",
-                        cursor: "not-allowed",
-                      });
-                      $("#next-button-sticky").attr("disabled", "disabled");
-                    } else {
-                      $("#next-button-sticky").css({
-                        opacity: "1",
-                        cursor: "pointer",
-                      });
-                      $("#next-button-sticky").removeAttr("disabled");
+                      if (nextButton) {
+                        const disabledInShadow = winShadowRoot.querySelector(
+                          'form > div.z-50.flex-grow.py-6.mt-6.bg-color.shadow-2xl > div > div > button[disabled="disabled"]'
+                        );
+
+                        if (disabledInShadow) {
+                          nextButton.style.opacity = "0.5";
+                          nextButton.style.cursor = "not-allowed";
+                          nextButton.disabled = true;
+                        } else {
+                          nextButton.style.opacity = "1";
+                          nextButton.style.cursor = "pointer";
+                          nextButton.disabled = false;
+                        }
+                      }
                     }
 
-                    const back_button =
-                      window.$shedulerShadowRoot.querySelector(
-                        "#app > div.flex.flex-col.flex-grow.mt-6 > form > div.z-50.flex-grow.py-6.mt-6.bg-color.shadow-2xl > div > div > div a"
-                      );
-                    if (back_button) {
-                      $("#back-button-sticky-mobile, #back-button-sticky").css(
-                        "opacity",
-                        "1"
-                      );
-                      $("#back-button-sticky-mobile, #back-button-sticky").css(
-                        "cursor",
-                        "pointer"
-                      );
-                      $("#wf-back-button-mobile").show();
+                    const backButton = winShadowRoot.querySelector(
+                      "#app > div.flex.flex-col.flex-grow.mt-6 > form > div.z-50.flex-grow.py-6.mt-6.bg-color.shadow-2xl > div > div > div a"
+                    );
+
+                    const backStickyButtons = document.querySelectorAll(
+                      "#back-button-sticky-mobile, #back-button-sticky"
+                    );
+                    const wfBackButton = document.querySelector(
+                      "#wf-back-button-mobile"
+                    );
+
+                    if (backButton) {
+                      backStickyButtons.forEach((el) => {
+                        el.style.opacity = "1";
+                        el.style.cursor = "pointer";
+                      });
+                      if (wfBackButton) wfBackButton.style.display = "";
                     } else {
-                      $("#back-button-sticky-mobile, #back-button-sticky").css(
-                        "opacity",
-                        "0"
-                      );
-                      $("#wf-back-button-mobile").hide();
+                      backStickyButtons.forEach((el) => {
+                        el.style.opacity = "0";
+                      });
+                      if (wfBackButton) wfBackButton.style.display = "none";
                     }
+
                     if (
-                      window.$shedulerShadowRoot.querySelector(
+                      winShadowRoot.querySelector(
                         "#app > div.flex.flex-col.flex-grow.mt-6 > div.flex.flex-col.flex-grow > div > div > div"
                       ) &&
                       !hasAddedBackBtn
                     ) {
-                      $(
-                        window.$shedulerShadowRoot.querySelector(
-                          "#app > div.flex.flex-col.flex-grow.mt-6 > div.flex.flex-col.flex-grow > div > div > div"
-                        )
-                      ).append(
-                        "<button class='back-btn-home' onclick='refresh_page()'>Back To Home</button>"
+                      const modal = winShadowRoot.querySelector(
+                        "#app > div.flex.flex-col.flex-grow.mt-6 > div.flex.flex-col.flex-grow > div > div > div"
                       );
+
+                      if (modal) {
+                        modal.insertAdjacentHTML(
+                          "beforeend",
+                          "<button class='back-btn-home' onclick='refresh_page()'>Back To Home</button>"
+                        );
+                      }
                       hasAddedBackBtn = true;
                     }
+
                     if (
-                      window.$shedulerShadowRoot.querySelector(
-                        "input#true-policy-holder"
-                      ) &&
+                      winShadowRoot.querySelector("input#true-policy-holder") &&
                       canObservePolicyRadio
                     ) {
-                      $(
-                        window.$shedulerShadowRoot.querySelector(
-                          "input#false-policy-holder"
-                        )
-                      ).on("change", function () {
-                        $(
-                          window.$shedulerShadowRoot.querySelector(
-                            "input#policy_holders_firstname"
-                          )
-                        ).val("");
-                        $(
-                          window.$shedulerShadowRoot.querySelector(
-                            "input#policy_holders_lastname"
-                          )
-                        ).val("");
-                        setTimeout(function () {
-                          $(
-                            window.$shedulerShadowRoot.querySelector(
-                              "input#policy_holders_dob"
-                            )
-                          ).val("");
-                        }, 500);
-                        // Detach the event handlers using their namespaces
-                        // Detach first name sync handler
-                        $(
-                          window.$shedulerShadowRoot.querySelector(
-                            "input#first_name"
-                          )
-                        ).off("change.first_name_sync");
-                        // Detach last name sync handler
-                        $(
-                          window.$shedulerShadowRoot.querySelector(
-                            "input#last_name"
-                          )
-                        ).off("change.last_name_sync");
-                        // Detach birth date sync handler
-                        $(
-                          window.$shedulerShadowRoot.querySelector(
-                            "input#birth_date"
-                          )
-                        ).off("change.birth_date_sync");
-                      });
+                      const falsePolicyHolder = winShadowRoot.querySelector(
+                        "input#false-policy-holder"
+                      );
 
-                      $(
-                        window.$shedulerShadowRoot.querySelector(
-                          "input#true-policy-holder"
-                        )
-                      ).on("change", function () {
-                        // Sync the initial values from first name, last name, and birth date
-                        $(
-                          window.$shedulerShadowRoot.querySelector(
+                      if (falsePolicyHolder) {
+                        falsePolicyHolder.addEventListener("change", () => {
+                          const firstName = winShadowRoot.querySelector(
                             "input#policy_holders_firstname"
-                          )
-                        ).val(
-                          $(
-                            window.$shedulerShadowRoot.querySelector(
-                              "input#first_name"
-                            )
-                          ).val()
-                        );
-                        $(
-                          window.$shedulerShadowRoot.querySelector(
+                          );
+                          if (firstName) firstName.value = "";
+
+                          const lastName = winShadowRoot.querySelector(
                             "input#policy_holders_lastname"
-                          )
-                        ).val(
-                          $(
-                            window.$shedulerShadowRoot.querySelector(
-                              "input#last_name"
-                            )
-                          ).val()
-                        );
-                        $(
-                          window.$shedulerShadowRoot.querySelector(
+                          );
+                          if (lastName) lastName.value = "";
+
+                          setTimeout(() => {
+                            const dob = winShadowRoot.querySelector(
+                              "input#policy_holders_dob"
+                            );
+                            if (dob) dob.value = "";
+                          }, 500);
+
+                          const detachListener = (selector) => {
+                            const el = winShadowRoot.querySelector(selector);
+                            if (el) {
+                              const newEl = el.cloneNode(true);
+                              el.replaceWith(newEl);
+                            }
+                          };
+
+                          detachListener("input#first_name");
+                          detachListener("input#last_name");
+                          detachListener("input#birth_date");
+                        });
+                      }
+
+                      const truePolicyHolder = winShadowRoot.querySelector(
+                        "input#true-policy-holder"
+                      );
+
+                      if (truePolicyHolder) {
+                        truePolicyHolder.addEventListener("change", () => {
+                          const firstNameInput =
+                            winShadowRoot.querySelector("input#first_name");
+                          const lastNameInput =
+                            winShadowRoot.querySelector("input#last_name");
+                          const birthDateInput =
+                            winShadowRoot.querySelector("input#birth_date");
+                          const policyFirstName = winShadowRoot.querySelector(
+                            "input#policy_holders_firstname"
+                          );
+                          const policyLastName = winShadowRoot.querySelector(
+                            "input#policy_holders_lastname"
+                          );
+                          const policyDob = winShadowRoot.querySelector(
                             "input#policy_holders_dob"
-                          )
-                        ).val(
-                          $(
-                            window.$shedulerShadowRoot.querySelector(
-                              "input#birth_date"
-                            )
-                          ).val()
-                        );
+                          );
 
-                        // Attach event handlers with namespace for syncing real-time changes
-                        // Sync changes in first name
-                        $(
-                          window.$shedulerShadowRoot.querySelector(
-                            "input#first_name"
-                          )
-                        ).on("change.first_name_sync", function () {
-                          $(
-                            window.$shedulerShadowRoot.querySelector(
-                              "input#policy_holders_firstname"
-                            )
-                          ).val($(this).val());
+                          if (firstNameInput && policyFirstName)
+                            policyFirstName.value = firstNameInput.value;
+                          if (lastNameInput && policyLastName)
+                            policyLastName.value = lastNameInput.value;
+                          if (birthDateInput && policyDob)
+                            policyDob.value = birthDateInput.value;
+
+                          const sync = (source, target) => {
+                            if (source && target) {
+                              const handler = () => {
+                                target.value = source.value;
+                              };
+                              source.addEventListener("change", handler);
+
+                              source._syncHandler = handler;
+                            }
+                          };
+
+                          sync(firstNameInput, policyFirstName);
+                          sync(lastNameInput, policyLastName);
+                          sync(birthDateInput, policyDob);
                         });
-                        // Sync changes in last name
-                        $(
-                          window.$shedulerShadowRoot.querySelector(
-                            "input#last_name"
-                          )
-                        ).on("change.last_name_sync", function () {
-                          $(
-                            window.$shedulerShadowRoot.querySelector(
-                              "input#policy_holders_lastname"
-                            )
-                          ).val($(this).val());
-                        });
-                        // Sync changes in birth date
-                        $(
-                          window.$shedulerShadowRoot.querySelector(
-                            "input#birth_date"
-                          )
-                        ).on("change.birth_date_sync", function () {
-                          $(
-                            window.$shedulerShadowRoot.querySelector(
-                              "input#policy_holders_dob"
-                            )
-                          ).val($(this).val());
-                        });
-                      });
+                      }
+
                       canObservePolicyRadio = false; // eventHandler already attached
                     }
 
-                    /* this is where we update the phone number in the success modal */
-                    /* It is failing when the observer does not observe attributes & subtree changes , so moved the jarvis success callback*/
-                    /* 
-                    if (
-                      window.$shedulerShadowRoot.querySelector(
-                        "#app > div.flex.flex-col.flex-grow.mt-6 > div.flex.flex-col.flex-grow > div > div > div > p.text-lg.md\\:text-2xl"
-                      ) &&
-                      !hasAddedPhoneNumber
-                    ) {
-                      $(
-                        window.$shedulerShadowRoot.querySelector(
-                          "#app > div.flex.flex-col.flex-grow.mt-6 > div.flex.flex-col.flex-grow > div > div > div > p.text-lg.md\\:text-2xl"
-                        )
-                      ).after(
-                        `<p class="phone-number text-lg md:text-2xl">${phoneNumber}</p>`
-                      );
-                      hasAddedPhoneNumber = true;
-                    }
-                    */
-
                     if (
                       !hasGoneStepTwoOnce &&
-                      window.$shedulerShadowRoot.querySelector(
+                      winShadowRoot.querySelector(
                         "#app > div.flex.flex-col.flex-grow.mt-6 > form > div.container.pt-6.mx-auto.sm\\:p-6.flex-grow > div > div > div:has(>div>div>div>div[date-picker-date])"
                       ) == null &&
                       hasClosedAvailDropdown
@@ -1030,24 +1030,25 @@
                       hasClosedAvailDropdown = false; //if the above div dont exist and we have closed the dropdown we need to close it again
                     }
 
-                    const dropdownDiv =
-                      window.$shedulerShadowRoot.querySelector(
-                        "#app>div.flex.flex-col.flex-grow.mt-6>form>div.container.pt-6.mx-auto>div>div>div:nth-child(3)>div>div>div>div:nth-child(2)>div>div.relative.flex.items-center.justify-center.pb-2.mb-4.border-b.border-gray-300.cursor-pointer.select-none"
-                      );
+                    const dropdownDiv = winShadowRoot.querySelector(
+                      "#app>div.flex.flex-col.flex-grow.mt-6>form>div.container.pt-6.mx-auto>div>div>div:nth-child(3)>div>div>div>div:nth-child(2)>div>div.relative.flex.items-center.justify-center.pb-2.mb-4.border-b.border-gray-300.cursor-pointer.select-none"
+                    );
                     if (dropdownDiv && !hasClosedAvailDropdown) {
                       setTimeout(function () {
                         //check if next div if classless means it is the dropdown then we close it
                         if (
-                          window.$shedulerShadowRoot.querySelector(
+                          winShadowRoot.querySelector(
                             "#app>div.flex.flex-col.flex-grow.mt-6>form>div.container.pt-6.mx-auto>div>div>div:nth-child(3)>div>div>div>div:nth-child(2)>div>div.relative.flex.items-center.justify-center.pb-2.mb-4.border-b.border-gray-300.cursor-pointer.select-none + div"
                           ).classList.length == 0
                         ) {
                           // the dropdown container div has no class, so if the next subling of dropdown header has no class it means the dropdown is opened
-                          window.$shedulerShadowRoot
-                            .querySelector(
-                              "#app>div.flex.flex-col.flex-grow.mt-6>form>div.container.pt-6.mx-auto>div>div>div:nth-child(3)>div>div>div>div:nth-child(2)>div>div.relative.flex.items-center.justify-center.pb-2.mb-4.border-b.border-gray-300.cursor-pointer.select-none"
-                            )
-                            .click();
+                          const target = winShadowRoot.querySelector(
+                            "#app>div.flex.flex-col.flex-grow.mt-6>form>div.container.pt-6.mx-auto>div>div>div:nth-child(3)>div>div>div>div:nth-child(2)>div>div.relative.flex.items-center.justify-center.pb-2.mb-4.border-b.border-gray-300.cursor-pointer.select-none"
+                          );
+
+                          if (target) {
+                            target.click();
+                          }
                         }
                       }, 500);
                       hasClosedAvailDropdown = true;
@@ -1066,7 +1067,7 @@
               childList: true, //the most needed
               //subtree: true, //!isIOS(),
             };
-            observer.observe(window.$shedulerShadowRoot, config);
+            observer.observe(this.window.$shedulerShadowRoot, config);
             //}
             //},0)
             var loading_icon_temp = document.getElementById(
