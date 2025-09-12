@@ -8,7 +8,7 @@
   // --- Consent cookie utilities
   function setCookie(name, value, days) {
     const expires = new Date(Date.now() + days * 864e5).toUTCString();
-    document.cookie = `${name}=${value}; path=/; expires=${expires}`;
+    document.cookie = `${name}=${value}; path=/; expires=${expires}; Secure; SameSite=Lax`;
   }
 
   function getCookie(name) {
@@ -22,12 +22,12 @@
     document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
   }
 
+  // --- Daily reset logic
   (function () {
     const resetKey = "consent-reset-date";
-    const today = new Date().toISOString().split("T")[0]; // e.g. "2025-09-12"
+    const today = new Date().toISOString().split("T")[0]; // "YYYY-MM-DD"
     const storedDate = getCookie(resetKey);
 
-    // If today's date isn't stored, reset consent and update the cookie
     if (storedDate !== today) {
       deleteCookie("Cookie-consent-state");
       setCookie(resetKey, today, 1); // expire in 1 day
@@ -61,18 +61,19 @@
     })(window, document, "clarity", "script", "t9p9fy8t6t");
   }
 
-  // --- Flags for use in the page
+  // --- Flags
   window.showCookieConsentBanner = false;
   window.cookieConsentAccepted = false;
   window.addedCrazyEggFlag = false;
 
+  // --- Check consent state
   let cookieConsentState = getCookie("Cookie-consent-state");
-
   if (!cookieConsentState) {
     cookieConsentState = "pending";
     setCookie("Cookie-consent-state", "pending", 365);
   }
 
+  // --- Apply consent settings
   if (cookieConsentState === "accepted") {
     window.cookieConsentAccepted = true;
 
@@ -89,7 +90,7 @@
     gtag("set", "ads_data_redaction", false);
 
     if (!window.addedCrazyEggFlag) {
-      addScript("//script.crazyegg.com/pages/scripts/0127/5041.js");
+      addScript("https://script.crazyegg.com/pages/scripts/0127/5041.js");
       window.addedCrazyEggFlag = true;
     }
 
@@ -109,6 +110,61 @@
 
     gtag("set", "ads_data_redaction", true);
   }
+
+  // --- Handle banner and buttons after DOM is ready
+  document.addEventListener("DOMContentLoaded", function () {
+    const banner = document.getElementById("cookie-consent-wrapper");
+    if (!banner || !window.showCookieConsentBanner) return;
+
+    banner.style.display = "block";
+
+    // Accept button
+    const acceptBtn = banner.querySelector('[cookie-consent="accept"]');
+    acceptBtn?.addEventListener("click", function () {
+      setCookie("Cookie-consent-state", "accepted", 365);
+
+      gtag("consent", "update", {
+        ad_storage: "granted",
+        ad_user_data: "granted",
+        ad_personalization: "granted",
+        analytics_storage: "granted",
+        personalization_storage: "granted",
+        functionality_storage: "granted",
+        security_storage: "granted",
+      });
+
+      gtag("set", "ads_data_redaction", false);
+
+      if (!window.addedCrazyEggFlag) {
+        addScript("https://script.crazyegg.com/pages/scripts/0127/5041.js");
+        window.addedCrazyEggFlag = true;
+      }
+
+      loadClarityPixel();
+
+      banner.style.display = "none";
+    });
+
+    // Decline button
+    const declineBtn = banner.querySelector('[cookie-consent="decline"]');
+    declineBtn?.addEventListener("click", function () {
+      setCookie("Cookie-consent-state", "declined", 365);
+
+      gtag("consent", "update", {
+        ad_storage: "denied",
+        ad_user_data: "denied",
+        ad_personalization: "denied",
+        analytics_storage: "denied",
+        personalization_storage: "denied",
+        functionality_storage: "denied",
+        security_storage: "denied",
+      });
+
+      gtag("set", "ads_data_redaction", true);
+
+      banner.style.display = "none";
+    });
+  });
 </script>
 <script>
   if (history.scrollRestoration) {
