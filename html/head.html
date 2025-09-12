@@ -1,0 +1,352 @@
+<script>
+  // --- Google Tag setup
+  window.dataLayer = window.dataLayer || [];
+  function gtag() {
+    dataLayer.push(arguments);
+  }
+
+  // --- Consent cookie utilities
+  function setCookie(name, value, days) {
+    const expires = new Date(Date.now() + days * 864e5).toUTCString();
+    document.cookie = `${name}=${value}; path=/; expires=${expires}`;
+  }
+
+  function getCookie(name) {
+    const match = document.cookie.match(
+      new RegExp("(^| )" + name + "=([^;]+)")
+    );
+    return match ? match[2] : null;
+  }
+
+  function deleteCookie(name) {
+    document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
+  }
+
+  (function () {
+    const resetKey = "consent-reset-date";
+    const today = new Date().toISOString().split("T")[0]; // e.g. "2025-09-12"
+    const storedDate = getCookie(resetKey);
+
+    // If today's date isn't stored, reset consent and update the cookie
+    if (storedDate !== today) {
+      deleteCookie("Cookie-consent-state");
+      setCookie(resetKey, today, 1); // expire in 1 day
+    }
+  })();
+
+  // --- Script loader
+  function addScript(src) {
+    const s = document.createElement("script");
+    s.src = src;
+    s.async = true;
+    document.head.appendChild(s);
+  }
+
+  // --- Clarity loader
+  function loadClarityPixel() {
+    if (window.clarityPixelLoaded) return;
+    window.clarityPixelLoaded = true;
+
+    (function (c, l, a, r, i, t, y) {
+      c[a] =
+        c[a] ||
+        function () {
+          (c[a].q = c[a].q || []).push(arguments);
+        };
+      t = l.createElement(r);
+      t.async = 1;
+      t.src = "https://www.clarity.ms/tag/t9p9fy8t6t";
+      y = l.getElementsByTagName(r)[0];
+      y.parentNode.insertBefore(t, y);
+    })(window, document, "clarity", "script", "t9p9fy8t6t");
+  }
+
+  // --- Flags for use in the page
+  window.showCookieConsentBanner = false;
+  window.cookieConsentAccepted = false;
+  window.addedCrazyEggFlag = false;
+
+  let cookieConsentState = getCookie("Cookie-consent-state");
+
+  if (!cookieConsentState) {
+    cookieConsentState = "pending";
+    setCookie("Cookie-consent-state", "pending", 365);
+  }
+
+  if (cookieConsentState === "accepted") {
+    window.cookieConsentAccepted = true;
+
+    gtag("consent", "default", {
+      ad_storage: "granted",
+      ad_user_data: "granted",
+      ad_personalization: "granted",
+      analytics_storage: "granted",
+      personalization_storage: "granted",
+      functionality_storage: "granted",
+      security_storage: "granted",
+    });
+
+    gtag("set", "ads_data_redaction", false);
+
+    if (!window.addedCrazyEggFlag) {
+      addScript("//script.crazyegg.com/pages/scripts/0127/5041.js");
+      window.addedCrazyEggFlag = true;
+    }
+
+    loadClarityPixel();
+  } else {
+    window.showCookieConsentBanner = true;
+
+    gtag("consent", "default", {
+      ad_storage: "denied",
+      ad_user_data: "denied",
+      ad_personalization: "denied",
+      analytics_storage: "denied",
+      personalization_storage: "denied",
+      functionality_storage: "denied",
+      security_storage: "denied",
+    });
+
+    gtag("set", "ads_data_redaction", true);
+  }
+</script>
+<script>
+  if (history.scrollRestoration) {
+    history.scrollRestoration = "manual";
+  } else {
+    window.addEventListener("beforeunload", (event) => {
+      window.scrollTo(0, 0);
+    });
+  }
+</script>
+<style>
+  .review-p {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 9;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  body,
+  html {
+    overscroll-behavior: none;
+    width: 100%;
+  }
+  .w-webflow-badge {
+    display: none !important;
+  }
+  @media all and (width > 991px) {
+    .desktop {
+      display: block;
+    }
+    .tablet {
+      display: none;
+    }
+    .mobile-down {
+      display: none;
+    }
+    .mobile-up {
+      display: block;
+    }
+  }
+  @media all and (992px > width > 767px) {
+    .desktop {
+      display: none;
+    }
+    .tablet {
+      display: block;
+    }
+    .mobile-down {
+      display: none;
+    }
+    .mobile-up {
+      display: block;
+    }
+  }
+  @media all and (width < 768px) {
+    .desktop {
+      display: none;
+    }
+    .tablet {
+      display: none;
+    }
+    .mobile-down {
+      display: block;
+    }
+    .mobile-up {
+      display: none;
+    }
+  }
+  b,
+  strong {
+    font-weight: 400;
+  }
+  nav a[aria-current="page"],
+  nav .nav-dropdown:has(.active-url) .dropdown-link-text,
+  nav .active-url {
+    color: var(--muted-onyx);
+  }
+  body.no-scroll {
+    max-height: 100dvh;
+    overflow: hidden;
+  }
+</style>
+
+<style>
+  /*custom brand*/
+
+  body[brand="Smile Workshop Forney Branding"] {
+    --light-green: #fbc01a;
+    --brand-green: #eb5b22;
+    --mint-green: #fbc01a;
+    --text-black-brand: #fbfeff;
+    --bold-gray-brand: #212930;
+    --ice-green: #fffaeb;
+    --box-muted-onyx: #aaa9aa;
+    --white-black-themed: #212930;
+    --brand-green-2: #fbc01a;
+    --white-dot-slider-themed: #fbc01a;
+    --white-dot-slider-border-themed: #fbc01a;
+    --bold-grey-themed: #212930;
+  }
+
+  /* Default styles for images */
+  [img-logo-for="forney"] {
+    display: none !important;
+  }
+
+  [img-logo-for="all-others"] {
+    display: block !important;
+  }
+
+  /* Specific styles for the Forney brand */
+  body[brand="Smile Workshop Forney Branding"] [img-logo-for="forney"] {
+    display: block !important;
+  }
+
+  body[brand="Smile Workshop Forney Branding"] [img-logo-for="all-others"] {
+    display: none !important;
+  }
+
+  body[brand="Smile Workshop Forney Branding"] .green-bg-container {
+    background: linear-gradient(
+      180deg,
+      rgba(251, 192, 26, 0.5) 0%,
+      rgba(255, 255, 255, 0) 100%
+    );
+  }
+
+  html[data-wf-page="66a29d804d1aff27a2f2ebff"]
+    body[brand="Smile Workshop Forney Branding"]
+    .green-bg-container,
+  html[data-wf-page="66a29d804d1aff27a2f2eb9a"]
+    body[brand="Smile Workshop Forney Branding"]
+    .green-bg-wrapper,
+  html[data-wf-page="66a29d804d1aff27a2f2ea9e"]
+    body[brand="Smile Workshop Forney Branding"]
+    .green-bg-wrapper {
+    background: linear-gradient(189deg, #fbf4da 40%, #fbfeff 57%);
+  }
+
+  body[brand="Smile Workshop Forney Branding"] .service-summary li {
+    list-style-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='12' viewBox='0 0 11 12' fill='none'%3E%3Ccircle cx='5.5' cy='6' r='5.5' fill='%23EB5B22'/%3E%3C/svg%3E");
+  }
+
+  @media all and (width < 768px) {
+    body[brand="Smile Workshop Forney Branding"] .btn-offers-page::after {
+      background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M5.96387 1L10.9639 6L5.96387 11" stroke="%23EB5B22"/><path d="M1.07812 6L10.9639 6" stroke="%23EB5B22"/></svg>');
+    }
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+  #local-footer-container {
+    z-index: 2;
+    position: relative;
+  }
+
+  #map-container
+    > div.mapboxgl-control-container
+    > div.mapboxgl-ctrl-bottom-right,
+  .mapboxgl-ctrl-attrib-inner {
+    display: none;
+  }
+  #map-container
+    > div.mapboxgl-canvas-container.mapboxgl-interactive.mapboxgl-touch-drag-pan.mapboxgl-touch-zoom-rotate
+    > div
+    > svg
+    > path:nth-child(3) {
+    fill: var(--brand-green);
+  }
+  body[brand="Smile Workshop Forney Branding"]
+    #map-container-contact
+    > div.mapboxgl-canvas-container.mapboxgl-interactive.mapboxgl-touch-drag-pan.mapboxgl-touch-zoom-rotate
+    > div {
+    background-image: url(https://uploads-ssl.webflow.com/66a29d804d1aff27a2f2ea9e/66b23e4469cf090f7da8d4bb_pin-sw-forney.svg) !important;
+  }
+</style>
+
+<style>
+  /* slight blur on load */
+  html {
+    -webkit-filter: blur(15px);
+    filter: blur(10px);
+    transition: filter 1s ease;
+    max-height: 100dvh;
+    overflow: hidden;
+  }
+</style>
+
+<script>
+  var head = document.head;
+  var script = document.createElement("script");
+  script.type = "text/javascript";
+  script.src =
+    "https://t.myidealdental.com/v1/lst/universal-script?ph=8c5be033523279bfbc59b28f24828950a91824c75c3ff9a865b64b700545c12a&tag=!clicked&ref_url=" +
+    encodeURI(document.URL);
+  head.appendChild(script);
+</script>
+
+<script>
+  const html = document.querySelector("html");
+  document.addEventListener("DOMContentLoaded", function () {
+    html.style.webkitFilter = "blur(0px)";
+    html.style.filter = "blur(0px)";
+    html.style.overflow = "auto";
+    html.style.overflowX = "hidden";
+    html.style.maxHeight = "none";
+  });
+</script>
+<style>
+  .accordion-wrapper:hover .accordion-head-h1 {
+    color: var(--muted-onyx);
+  }
+</style>
+
+<!-- Google Tag Manager -->
+<script>
+  (function (w, d, s, l, i) {
+    w[l] = w[l] || [];
+    w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+    var f = d.getElementsByTagName(s)[0],
+      j = d.createElement(s),
+      dl = l != "dataLayer" ? "&l=" + l : "";
+    j.async = true;
+    j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+    f.parentNode.insertBefore(j, f);
+  })(window, document, "script", "dataLayer", "GTM-KV3TTSJ");
+</script>
+<!-- End Google Tag Manager -->
+<script
+  type="text/javascript"
+  async
+  src="https://pm.geniusmonkey.com/gm.js?id=1028351937&z=1"
+></script>

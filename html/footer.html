@@ -1,0 +1,266 @@
+<script>
+  $(async function () {
+    try {
+      const consentState = getCookie("Cookie-consent-state");
+
+      if (consentState === "pending" && window.showCookieConsentBanner) {
+        $("#cookie-consent-wrapper").fadeIn(function () {
+          // Accept button logic
+          $('[cookie-consent="accept"]').click(function () {
+            setCookie("Cookie-consent-state", "accepted", 365);
+
+            gtag("consent", "update", {
+              ad_storage: "granted",
+              ad_user_data: "granted",
+              ad_personalization: "granted",
+              analytics_storage: "granted",
+              personalization_storage: "granted",
+              functionality_storage: "granted",
+              security_storage: "granted",
+            });
+
+            gtag("set", "ads_data_redaction", false);
+
+            if (!window.addedCrazyEggFlag) {
+              addScript("//script.crazyegg.com/pages/scripts/0127/5041.js");
+              window.addedCrazyEggFlag = true;
+            }
+
+            loadClarityPixel();
+
+            $("#cookie-consent-wrapper").fadeOut();
+          });
+
+          // Decline button logic
+          $('[cookie-consent="decline"]').click(function () {
+            setCookie("Cookie-consent-state", "declined", 365);
+
+            gtag("consent", "update", {
+              ad_storage: "denied",
+              ad_user_data: "denied",
+              ad_personalization: "denied",
+            });
+
+            gtag("set", "ads_data_redaction", true);
+
+            $("#cookie-consent-wrapper").fadeOut();
+          });
+        });
+      }
+    } catch (error) {
+      console.error("Cookie Consent Error:", error);
+    }
+  });
+
+  // Redefine utilities in case they're not globally scoped
+  function setCookie(name, value, days) {
+    const expires = new Date(Date.now() + days * 864e5).toUTCString();
+    document.cookie = `${name}=${value}; path=/; expires=${expires}`;
+  }
+
+  function getCookie(name) {
+    const match = document.cookie.match(
+      new RegExp("(^| )" + name + "=([^;]+)")
+    );
+    return match ? match[2] : null;
+  }
+
+  function addScript(src) {
+    const s = document.createElement("script");
+    s.src = src;
+    s.async = true;
+    document.head.appendChild(s);
+  }
+
+  function loadClarityPixel() {
+    if (window.clarityPixelLoaded) return;
+    window.clarityPixelLoaded = true;
+
+    (function (c, l, a, r, i, t, y) {
+      c[a] =
+        c[a] ||
+        function () {
+          (c[a].q = c[a].q || []).push(arguments);
+        };
+      t = l.createElement(r);
+      t.async = 1;
+      t.src = "https://www.clarity.ms/tag/t9p9fy8t6t";
+      y = l.getElementsByTagName(r)[0];
+      y.parentNode.insertBefore(t, y);
+    })(window, document, "clarity", "script", "t9p9fy8t6t");
+  }
+</script>
+
+<!-- Google Tag Manager (noscript) -->
+<noscript
+  ><iframe
+    src="https://www.googletagmanager.com/ns.html?id=GTM-KV3TTSJ"
+    height="0"
+    width="0"
+    style="display: none; visibility: hidden"
+  ></iframe
+></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+<script>
+  $(function () {
+    //document ready
+    if (document.querySelector("#local-navbar-container")) {
+      const locale_prepend =
+        document.getElementsByTagName("html")[0].getAttribute("lang") == "es"
+          ? "/es"
+          : "";
+      const local_home = `${locale_prepend}${$("#local-logo-link").attr(
+        "nav-link-to"
+      )}`;
+      $("#local-logo-link").attr("href", local_home);
+      $("[nav-link-to]")
+        .not("#local-logo-link")
+        .each(function () {
+          let linkto = $(this).attr("nav-link-to");
+          if ($(this).attr("query-param-value")) {
+            linkto += `?${$(this).attr("query-param-key")}=${encodeURIComponent(
+              $(this).attr("query-param-value")
+            )}`;
+          }
+          $(this).attr("href", `${local_home}/${linkto}`);
+        });
+    }
+
+    let current_path = window.location.pathname;
+    $(`a[href='${current_path}']`).addClass("active-url");
+  });
+</script>
+
+<script>
+  var scrollPositionNavSafeVarName = 0;
+  $(function () {
+    const targetNode = document.querySelector(".w-nav-overlay");
+    if (targetNode) {
+      const observer = new MutationObserver((mutationsList) => {
+        for (const mutation of mutationsList) {
+          if (
+            mutation.type === "attributes" &&
+            mutation.attributeName === "style"
+          ) {
+            const displayStyle = mutation.target.style.display;
+            if (displayStyle === "block") {
+              scrollPositionNavSafeVarName = window.scrollY;
+              setTimeout(function () {
+                $("body").addClass("no-scroll");
+              }, 500);
+            } else {
+              $("body").removeClass("no-scroll");
+              window.scrollTo(0, parseInt(scrollPositionNavSafeVarName, 10));
+            }
+          }
+        }
+      });
+
+      const config = { attributes: true, attributeFilter: ["style"] };
+      observer.observe(targetNode, config);
+    } else {
+      console.log("Element with class .w-nav-overlay not found");
+    }
+  });
+</script>
+
+<script>
+  // 🦷Homepage logo link's ARIA attributes
+  document.addEventListener("DOMContentLoaded", function () {
+    const logoLink = document.querySelector(".nav-company-logo");
+    if (logoLink) {
+      logoLink.removeAttribute("aria-current");
+      logoLink.setAttribute(
+        "aria-label",
+        "home, graphic, Ideal Dental logo, established 2008"
+      );
+    }
+  });
+</script>
+
+<script>
+  // 🦷 Footer logo link's ARIA attributes
+  document.addEventListener("DOMContentLoaded", function () {
+    const footerLogo = document.querySelector(".ideal-dental-footer-logo");
+
+    if (footerLogo) {
+      footerLogo.removeAttribute("aria-current");
+
+      footerLogo.setAttribute(
+        "aria-label",
+        "footer, graphic, Ideal Dental logo, established 2008"
+      );
+
+      if (!footerLogo.hasAttribute("tabindex")) {
+        footerLogo.setAttribute("tabindex", "0");
+      }
+    }
+  });
+</script>
+
+<script>
+  // 🦷 Scroll-to-top ARIA fix for all pages
+  document.addEventListener("DOMContentLoaded", function () {
+    function setScrollButtonAttributes() {
+      const scrollBlock = document.querySelector(".scroll-to-top");
+      if (scrollBlock) {
+        scrollBlock.setAttribute("role", "button");
+        scrollBlock.setAttribute("aria-label", "Button, back to top");
+        if (!scrollBlock.hasAttribute("tabindex")) {
+          scrollBlock.setAttribute("tabindex", "0");
+        }
+        return true;
+      }
+      return false;
+    }
+
+    const intervalId = setInterval(function () {
+      if (setScrollButtonAttributes()) {
+        clearInterval(intervalId);
+      }
+    }, 500);
+  });
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Ideal Dental Plan Logo
+    const idealPlanLogo = document.querySelector(".ideal-dental-plan-logo");
+    if (idealPlanLogo) {
+      idealPlanLogo.removeAttribute("aria-current");
+      idealPlanLogo.setAttribute("alt", "Graphic, Ideal Dental Plan");
+      idealPlanLogo.setAttribute("aria-label", "Graphic, Ideal Dental Plan");
+      if (!idealPlanLogo.hasAttribute("tabindex")) {
+        idealPlanLogo.setAttribute("tabindex", "0");
+      }
+    }
+
+    // CareCredit Plan Logo
+    const careCreditLogo = document.querySelector(".care-credit-plan-logo");
+    if (careCreditLogo) {
+      careCreditLogo.removeAttribute("aria-current");
+      careCreditLogo.setAttribute("alt", "Graphic, CareCredit Plan Logo");
+      careCreditLogo.setAttribute(
+        "aria-label",
+        "Graphic, CareCredit Plan Logo"
+      );
+      if (!careCreditLogo.hasAttribute("tabindex")) {
+        careCreditLogo.setAttribute("tabindex", "0");
+      }
+    }
+  });
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const ratingWrapper = document.querySelector(".rating-stars");
+    if (ratingWrapper) {
+      // Hide each individual SVG star from accessibility so they aren’t read separately
+      const stars = ratingWrapper.querySelectorAll("svg.rating-star");
+      stars.forEach(function (star) {
+        star.setAttribute("aria-hidden", "true");
+      });
+    }
+  });
+</script>
