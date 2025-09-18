@@ -295,16 +295,38 @@ function mapboxLocations() {
         geocoder.geocode(
           { location: { lat: coords.latitude, lng: coords.longitude } },
           (results, status) => {
+            console.log("[Geocode] Status:", status);
+            console.log("[Geocode] Raw results:", results);
+
             if (status === "OK" && results[0]) {
               const address = results[0].formatted_address;
+              console.log("[Geocode] Found address:", address);
+
               window.userSearchCityRegion = address;
 
-              const input = document.querySelector("#autocomplete"); // your search input
-              if (input) input.value = address;
+              const input = document.querySelector("#autocomplete");
+              if (input) {
+                input.value = address;
+                console.log(
+                  "[Geocode] Updated search input value:",
+                  input.value
+                );
+              } else {
+                console.warn(
+                  "[Geocode] Search input (#autocomplete) not found."
+                );
+              }
 
-              // Trigger same UI update as place_changed_handler
+              console.log(
+                "[Geocode] Calling updateVisibleOffices() and cardActionsSearch()..."
+              );
               updateVisibleOffices();
               cardActionsSearch();
+            } else {
+              console.warn(
+                "[Geocode] No results or failed with status:",
+                status
+              );
             }
           }
         );
