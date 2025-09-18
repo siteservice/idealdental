@@ -286,12 +286,28 @@ function mapboxLocations() {
         showUserHeading: true,
       }).on("geolocate", function (e) {
         const userExactCoords = [e.coords.longitude, e.coords.latitude];
-
         mapgl.flyTo({
           center: userExactCoords,
           essential: true,
           zoom: zoomLocAllowed,
         });
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode(
+          { location: { lat: coords.latitude, lng: coords.longitude } },
+          (results, status) => {
+            if (status === "OK" && results[0]) {
+              const address = results[0].formatted_address;
+              window.userSearchCityRegion = address;
+
+              const input = document.querySelector("#autocomplete"); // your search input
+              if (input) input.value = address;
+
+              // Trigger same UI update as place_changed_handler
+              updateVisibleOffices();
+              cardActionsSearch();
+            }
+          }
+        );
       })
     );
     document
