@@ -293,7 +293,12 @@ function mapboxLocations() {
         });
         const geocoder = new google.maps.Geocoder();
         geocoder.geocode(
-          { location: { lat: coords.latitude, lng: coords.longitude } },
+          {
+            location: {
+              lat: userExactCoords.latitude,
+              lng: userExactCoords.longitude,
+            },
+          },
           (results, status) => {
             console.log("[Geocode] Status:", status);
             console.log("[Geocode] Raw results:", results);
