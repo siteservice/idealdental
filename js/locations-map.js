@@ -295,8 +295,8 @@ function mapboxLocations() {
         geocoder.geocode(
           {
             location: {
-              lat: userExactCoords.latitude,
-              lng: userExactCoords.longitude,
+              lat: e.coords.latitude,
+              lng: e.coords.longitude,
             },
           },
           (results, status) => {
