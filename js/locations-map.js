@@ -291,6 +291,7 @@ function mapboxLocations() {
           essential: true,
           zoom: zoomLocAllowed,
         });
+
         const geocoder = new google.maps.Geocoder();
         geocoder.geocode(
           {
@@ -304,14 +305,42 @@ function mapboxLocations() {
             console.log("[Geocode] Raw results:", results);
 
             if (status === "OK" && results[0]) {
-              const address = results[0].formatted_address;
-              console.log("[Geocode] Found address:", address);
+              const components = results[0].address_components;
 
-              window.userSearchCityRegion = address;
+              // Extract City, State/Province, Country
+              let city = "";
+              let state = "";
+              let country = "";
+
+              components.forEach((comp) => {
+                if (comp.types.includes("locality")) {
+                  city = comp.long_name;
+                }
+                if (comp.types.includes("administrative_area_level_1")) {
+                  state = comp.short_name; // e.g., NB
+                }
+                if (comp.types.includes("country")) {
+                  country = comp.long_name;
+                }
+              });
+
+              // Build the string you want in the input
+              const formatted = [city, state, country]
+                .filter(Boolean)
+                .join(", ");
+
+              console.log("[Geocode] Parsed:", {
+                city,
+                state,
+                country,
+                formatted,
+              });
+
+              window.userSearchCityRegion = formatted;
 
               const input = document.querySelector("#autocomplete");
               if (input) {
-                input.value = address;
+                input.value = formatted;
                 console.log(
                   "[Geocode] Updated search input value:",
                   input.value
@@ -322,9 +351,6 @@ function mapboxLocations() {
                 );
               }
 
-              console.log(
-                "[Geocode] Calling updateVisibleOffices() and cardActionsSearch()..."
-              );
               updateVisibleOffices();
               cardActionsSearch();
             } else {
