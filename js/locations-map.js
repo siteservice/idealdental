@@ -301,13 +301,9 @@ function mapboxLocations() {
             },
           },
           (results, status) => {
-            console.log("[Geocode] Status:", status);
-            console.log("[Geocode] Raw results:", results);
-
             if (status === "OK" && results[0]) {
               const components = results[0].address_components;
 
-              // Extract City, State/Province, Country
               let city = "";
               let state = "";
               let country = "";
@@ -317,34 +313,22 @@ function mapboxLocations() {
                   city = comp.long_name;
                 }
                 if (comp.types.includes("administrative_area_level_1")) {
-                  state = comp.short_name; // e.g., NB
+                  state = comp.short_name;
                 }
                 if (comp.types.includes("country")) {
                   country = comp.long_name;
                 }
               });
 
-              // Build the string you want in the input
               const formatted = [city, state, country]
                 .filter(Boolean)
                 .join(", ");
-
-              console.log("[Geocode] Parsed:", {
-                city,
-                state,
-                country,
-                formatted,
-              });
 
               window.userSearchCityRegion = formatted;
 
               const input = document.querySelector("#autocomplete");
               if (input) {
                 input.value = formatted;
-                console.log(
-                  "[Geocode] Updated search input value:",
-                  input.value
-                );
               } else {
                 console.warn(
                   "[Geocode] Search input (#autocomplete) not found."
