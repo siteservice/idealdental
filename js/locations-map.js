@@ -158,7 +158,7 @@ function setLocation({ coords, formatted }) {
  * @param {*} zoom
  * @returns
  */
-function flyToCurrentLocation(zoom = 11) {
+function flyToCurrentLocation(zoom = 11, mapgl = mapgl) {
   if (!window.userSearchLongLat || window.userSearchLongLat.length !== 2) {
     console.warn("[flyToCurrentLocation] No current location set.");
     return;
@@ -377,7 +377,7 @@ function mapboxLocations() {
         if (geolocateBtn) {
           // geolocateBtn.classList.add("hidden");
           // geolocateBtn.click();
-          flyToCurrentLocation();
+          flyToCurrentLocation(11, mapgl);
         } else {
           console.error("Geolocate button not found");
         }
