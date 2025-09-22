@@ -145,7 +145,9 @@ function setLocation({ coords, formatted }) {
   console.log("[LocationManager] Updated:", locationState);
 
   const input = document.querySelector("#autocomplete");
+  console.log("[LocationManager] Input:", input);
   if (input && formatted) {
+    console.log("[LocationManager] Input:", input);
     input.value = formatted;
   }
 
