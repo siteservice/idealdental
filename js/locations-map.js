@@ -199,24 +199,20 @@ function FlyToLocation(zoom = 11, mapInstance, location) {
 function RenderUserMarker(mapInstance, coords) {
   if (!coords || coords.length !== 2) return;
 
-  const el = document.createElement("div");
-  el.className = "mapboxgl-user-location-dot";
+  if (!window.userMarker) {
+    // Create the custom element once
+    const el = document.createElement("div");
+    el.className = "mapboxgl-user-location-dot";
 
-  if (window.userMarker) {
-    window.userMarker.setLngLat(coords);
-
-    if (window.userMarker.getElement() !== el) {
-      window.userMarker.getElement().replaceWith(el);
-      window.userMarker.setElement(el);
-    }
-
-    console.log("[RenderUserMarker] Updated marker to:", coords);
-  } else {
     window.userMarker = new mapboxgl.Marker(el)
       .setLngLat(coords)
       .addTo(mapInstance);
 
     console.log("[RenderUserMarker] Created marker at:", coords);
+  } else {
+    // Only update coordinates, do NOT create a new element
+    window.userMarker.setLngLat(coords);
+    console.log("[RenderUserMarker] Updated marker to:", coords);
   }
 }
 
