@@ -131,6 +131,8 @@ const locationState = {
 
 /**
  * Update the location state and sync with map + input
+ * @param {[number, number]} coords - Lng, Lat coordinates
+ * @param {string} formatted - City, State, Country formatted string
  */
 function setLocation({ coords, formatted }) {
   if (coords) {
@@ -154,18 +156,33 @@ function setLocation({ coords, formatted }) {
 }
 
 /**
- * Function to fly to the current location
- * @param {*} zoom
- * @returns
+ * Get the currently set user location
+ * @returns {[number, number] | null} [lng, lat] or null if not set
  */
-function flyToCurrentLocation(zoom = 11, mapInstance) {
-  if (!window.userSearchLongLat || window.userSearchLongLat.length !== 2) {
-    console.warn("[flyToCurrentLocation] No current location set.");
+function getUserLocation() {
+  const coords = window.userLongLat;
+  if (!coords || coords.length !== 2) {
+    console.warn("[getUserLocation] No location set.");
+    return null;
+  }
+  return coords;
+}
+
+/**
+ * Function to fly to a location or the current set location
+ * @param {number} zoom - Zoom level for the map
+ * @param {mapboxgl.Map} mapInstance - Mapbox GL map instance
+ * @param {[number, number]} [location] - Optional [lng, lat] coordinates to fly to
+ */
+function FlyToLocation(zoom = 11, mapInstance, location) {
+  const coords = location || getUserLocation();
+
+  if (!coords || coords.length !== 2) {
+    console.warn("[FlyToLocation] No location set.");
     return;
   }
 
-  const coords = window.userSearchLongLat; // [lng, lat]
-  console.log("[flyToCurrentLocation] Flying to:", coords);
+  console.log("[FlyToLocation] Flying to:", coords);
 
   mapInstance.flyTo({
     center: coords,
@@ -377,7 +394,10 @@ function mapboxLocations() {
         if (geolocateBtn) {
           // geolocateBtn.classList.add("hidden");
           // geolocateBtn.click();
-          flyToCurrentLocation(11, mapgl);
+
+          // Get user's current location:
+
+          FlyToLocation(11, mapgl);
         } else {
           console.error("Geolocate button not found");
         }
