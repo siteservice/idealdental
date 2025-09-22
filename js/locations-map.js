@@ -202,7 +202,7 @@ function RenderUserMarker(mapInstance, coords) {
   // If marker exists, just update its position
   if (window.userMarker) {
     window.userMarker.setLngLat(coords);
-    console.log("[renderUserMarker] Updated marker to:", coords);
+    console.log("[RenderUserMarker] Updated marker to:", coords);
   } else {
     // Otherwise, create a new marker
     window.userMarker = new mapboxgl.Marker({
@@ -211,7 +211,7 @@ function RenderUserMarker(mapInstance, coords) {
     })
       .setLngLat(coords)
       .addTo(mapInstance);
-    console.log("[renderUserMarker] Created marker at:", coords);
+    console.log("[RenderUserMarker] Created marker at:", coords);
   }
 }
 
