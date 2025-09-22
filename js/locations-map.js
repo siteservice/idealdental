@@ -191,6 +191,30 @@ function FlyToLocation(zoom = 11, mapInstance, location) {
   });
 }
 
+/**
+ * Render or update the user location marker
+ * @param {mapboxgl.Map} mapInstance
+ * @param {[number, number]} coords - [lng, lat]
+ */
+function RenderUserMarker(mapInstance, coords) {
+  if (!coords || coords.length !== 2) return;
+
+  // If marker exists, just update its position
+  if (userMarker) {
+    userMarker.setLngLat(coords);
+  } else {
+    // Otherwise, create a new marker
+    userMarker = new mapboxgl.Marker({
+      color: "#007aff", // optional: color of the marker
+      scale: 1.2,
+    })
+      .setLngLat(coords)
+      .addTo(mapInstance);
+  }
+
+  console.log("[renderUserMarker] Marker placed at:", coords);
+}
+
 //Mapbox Functionality
 function mapboxLocations() {
   //Get region query parameter
@@ -399,6 +423,7 @@ function mapboxLocations() {
           // Get user's current location:
 
           FlyToLocation(11, mapgl);
+          RenderUserMarker(mapgl, userLongLat);
         } else {
           console.error("Geolocate button not found");
         }
