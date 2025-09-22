@@ -124,7 +124,7 @@ checkPermission();
 /**
  * Location State
  */
-export const locationState = {
+const locationState = {
   coords: null, // [lng, lat]
   formatted: null, // "City, State, Country"
 };
@@ -132,7 +132,7 @@ export const locationState = {
 /**
  * Update the location state and sync with map + input
  */
-export function setLocation({ coords, formatted }) {
+function setLocation({ coords, formatted }) {
   if (coords) {
     locationState.coords = coords;
     window.userSearchLongLat = coords;
