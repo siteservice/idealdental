@@ -317,9 +317,9 @@ function mapboxLocations() {
         // Draw an arrow next to the location dot to indicate which direction the device is heading.
         showUserHeading: true,
       }).on("geolocate", function (e) {
-        const userExactCoords = [e.coords.longitude, e.coords.latitude];
+        const coords = [e.coords.longitude, e.coords.latitude];
         mapgl.flyTo({
-          center: userExactCoords,
+          center: coords,
           essential: true,
           zoom: zoomLocAllowed,
         });
