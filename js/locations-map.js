@@ -379,10 +379,7 @@ function mapboxLocations() {
               window.regions_mapping[region].regionCoordinates[1];
           }
           //google.maps.event.trigger(autocomplete, 'place_changed');
-          place_changed_handler(
-            place,
-            window.regions_mapping[region].zoomLevel
-          );
+          placeChangedHandler(place, window.regions_mapping[region].zoomLevel);
         } else {
           console.error("Error:", error);
         }
@@ -1033,7 +1030,7 @@ function mapboxLocations() {
   window.isOutOfBounds = false;
 
   //Prefill the input for Google place search if region query parameter is set
-  /* This block is no longer needed check where the function place_changed_handler when region set from url is called
+  /* This block is no longer needed check where the function placeChangedHandler when region set from url is called
         if (region !== "" && acceptedRegions.includes(region)) {
             //input.focus();
             //input.value = inputValue;
@@ -1062,7 +1059,7 @@ function mapboxLocations() {
     types: ["geocode"],
     componentRestrictions: { country: "us" },
   });
-  function place_changed_handler(place_search, forced_zoom_level = false) {
+  function placeChangedHandler(place_search, forced_zoom_level = false) {
     searchMode = true;
     preventReRender = false;
     modalShown = false;
@@ -1247,15 +1244,21 @@ function mapboxLocations() {
         }
 
         // Output results
-        const closest_location_btn = $(
+        const showClosestLocationBtn = $(
           ".closest-location-wrapper .btn-primary"
         );
 
         if (nearestLocation) {
-          closest_location_btn.show();
-          closest_location_btn.on("click", function () {
+          console.log("[Nearest Location Found]", nearestLocation);
+
+          showClosestLocationBtn.show();
+          showClosestLocationBtn.on("click", function () {
+            console.log("[Closest Location Button Clicked]");
+
             modal.fadeOut().removeClass("modal-open").addClass("hidden");
+
             const coords = nearestLocation.geometry.coordinates;
+            console.log("[Fly To Coords]", coords);
 
             mapgl.flyTo({ center: coords, zoom: 9 });
 
@@ -1263,8 +1266,12 @@ function mapboxLocations() {
             geocoder.geocode(
               { location: { lat: coords[1], lng: coords[0] } },
               (results, status) => {
+                console.log("[Geocoder Status]", status, results);
+
                 if (status === "OK" && results[0]) {
                   const components = results[0].address_components;
+                  console.log("[Address Components]", components);
+
                   let city = "",
                     state = "",
                     country = "";
@@ -1280,8 +1287,12 @@ function mapboxLocations() {
                   const formatted = [city, state, country]
                     .filter(Boolean)
                     .join(", ");
+                  console.log("[Formatted Address]", formatted);
 
                   setLocation({ coords, formatted });
+                  console.log("[setLocation Called]", { coords, formatted });
+                } else {
+                  console.warn("[Geocoder Failed]", status);
                 }
               }
             );
@@ -1328,7 +1339,7 @@ function mapboxLocations() {
   }
 
   autocomplete.addListener("place_changed", () =>
-    place_changed_handler(autocomplete.getPlace())
+    placeChangedHandler(autocomplete.getPlace())
   );
 }
 
