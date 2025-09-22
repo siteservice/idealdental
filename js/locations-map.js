@@ -196,7 +196,7 @@ function FlyToLocation(zoom = 11, mapInstance, location) {
  * @param {mapboxgl.Map} mapInstance
  * @param {[number, number]} coords - [lng, lat]
  */
-function renderUserMarker(mapInstance, coords) {
+function RenderUserMarker(mapInstance, coords) {
   if (!coords || coords.length !== 2) return;
 
   // If marker exists, just update its position
