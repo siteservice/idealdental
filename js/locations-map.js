@@ -158,7 +158,7 @@ function setLocation({ coords, formatted }) {
  * @param {*} zoom
  * @returns
  */
-function flyToCurrentLocation(zoom = 11, mapgl = mapgl) {
+function flyToCurrentLocation(zoom = 11, mapInstance) {
   if (!window.userSearchLongLat || window.userSearchLongLat.length !== 2) {
     console.warn("[flyToCurrentLocation] No current location set.");
     return;
@@ -167,7 +167,7 @@ function flyToCurrentLocation(zoom = 11, mapgl = mapgl) {
   const coords = window.userSearchLongLat; // [lng, lat]
   console.log("[flyToCurrentLocation] Flying to:", coords);
 
-  mapgl.flyTo({
+  mapInstance.flyTo({
     center: coords,
     essential: true,
     zoom: zoom,
