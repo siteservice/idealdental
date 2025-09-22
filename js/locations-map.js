@@ -1248,17 +1248,118 @@ function mapboxLocations() {
         );
 
         if (nearestLocation) {
+          console.log(
+            "[Closest Location] Found nearestLocation:",
+            nearestLocation
+          );
           closest_location_btn.show();
+
           closest_location_btn.on("click", function () {
+            console.log("[Closest Location] Button clicked");
             window.isOutOfBounds = true;
             modalShown = true;
             modal.fadeOut().removeClass("modal-open").addClass("hidden");
+
+            const coords = nearestLocation.geometry.coordinates;
+            console.log("[Closest Location] Coordinates:", coords);
+
             mapgl.flyTo({
-              center: nearestLocation.geometry.coordinates,
+              center: coords,
               zoom: 9,
             });
+            console.log("[Closest Location] Map flying to:", coords);
+
+            // Reverse-geocode nearest location
+            const geocoder = new google.maps.Geocoder();
+            console.log("[Closest Location] Starting reverse geocode...");
+
+            geocoder.geocode(
+              {
+                location: {
+                  lat: coords[1], // [lng, lat] => lat
+                  lng: coords[0], // [lng, lat] => lng
+                },
+              },
+              (results, status) => {
+                console.log(
+                  "[Closest Location] Geocode status:",
+                  status,
+                  results
+                );
+
+                if (status === "OK" && results[0]) {
+                  const components = results[0].address_components;
+                  console.log(
+                    "[Closest Location] Address components:",
+                    components
+                  );
+
+                  let city = "";
+                  let state = "";
+                  let country = "";
+
+                  components.forEach((comp) => {
+                    if (comp.types.includes("locality")) {
+                      city = comp.long_name;
+                      console.log("[Closest Location] City:", city);
+                    }
+                    if (comp.types.includes("administrative_area_level_1")) {
+                      state = comp.short_name;
+                      console.log("[Closest Location] State:", state);
+                    }
+                    if (comp.types.includes("country")) {
+                      country = comp.long_name;
+                      console.log("[Closest Location] Country:", country);
+                    }
+                  });
+
+                  const formatted = [city, state, country]
+                    .filter(Boolean)
+                    .join(", ");
+                  console.log(
+                    "[Closest Location] Formatted address:",
+                    formatted
+                  );
+
+                  // Save for consistency
+                  window.userSearchCityRegion = formatted;
+                  window.userSearchLongLat = coords;
+                  console.log("[Closest Location] Saved search info:", {
+                    userSearchCityRegion: formatted,
+                    userSearchLongLat: coords,
+                  });
+
+                  // Update the input field
+                  const input = document.querySelector("#autocomplete");
+                  if (input) {
+                    input.value = formatted;
+                    console.log("[Closest Location] Input updated:", formatted);
+                  } else {
+                    console.warn(
+                      "[Closest Location] Autocomplete input not found"
+                    );
+                  }
+
+                  // Refresh office list + actions
+                  console.log("[Closest Location] Updating visible offices...");
+                  updateVisibleOffices();
+                  console.log(
+                    "[Closest Location] Running card actions search..."
+                  );
+                  cardActionsSearch();
+                } else {
+                  console.warn(
+                    "[Closest Location] Reverse geocode failed:",
+                    status
+                  );
+                }
+              }
+            );
           });
         } else {
+          console.warn(
+            "[Closest Location] No nearestLocation found, hiding button"
+          );
           closest_location_btn.hide();
         }
       }
