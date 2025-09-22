@@ -121,6 +121,7 @@ async function checkPermission() {
 
 checkPermission();
 
+// #region Utils
 /**
  * Location State
  */
@@ -131,16 +132,25 @@ const locationState = {
 
 /**
  * Update the input value with the formatted location
- * @param {*} formatted
+ * @param {string} formatted - The formatted location string
  */
 function UpdateInputValue(formatted) {
   const input = document.querySelector("#autocomplete");
-  if (input && formatted) {
-    input.value = formatted;
-    console.log("[UpdateInputValue] Updated:", formatted);
-  } else {
-    console.error("[UpdateInputValue] input or formatted address not found!");
+
+  if (!input) {
+    console.error(
+      "[UpdateInputValue] Input element (#autocomplete) not found in DOM!"
+    );
+    return;
   }
+
+  if (!formatted || typeof formatted !== "string") {
+    console.error("[UpdateInputValue] Invalid formatted value:", formatted);
+    return;
+  }
+
+  input.value = formatted;
+  console.log("[UpdateInputValue] Updated:", formatted);
 }
 
 /**
@@ -176,6 +186,8 @@ function SetLocation({ coords, formatted }) {
 function GetUserLocation() {
   const coords = window.userLongLat;
   const formatted = window.userSearchCityRegion;
+
+  console.log("[GetUserLocation] coords:", coords, "formatted:", formatted);
 
   if (!coords || coords.length !== 2) {
     console.warn("[GetUserLocation] No location set.");
@@ -232,6 +244,7 @@ function RenderUserMarker(mapInstance, coords) {
     console.log("[RenderUserMarker] Updated marker to:", coords);
   }
 }
+// #endregion
 
 //Mapbox Functionality
 function mapboxLocations() {
