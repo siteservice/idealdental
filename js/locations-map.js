@@ -121,6 +121,38 @@ async function checkPermission() {
 
 checkPermission();
 
+/**
+ * Location State
+ */
+export const locationState = {
+  coords: null, // [lng, lat]
+  formatted: null, // "City, State, Country"
+};
+
+/**
+ * Update the location state and sync with map + input
+ */
+export function setLocation({ coords, formatted }) {
+  if (coords) {
+    locationState.coords = coords;
+    window.userSearchLongLat = coords;
+  }
+  if (formatted) {
+    locationState.formatted = formatted;
+    window.userSearchCityRegion = formatted;
+  }
+
+  console.log("[LocationManager] Updated:", locationState);
+
+  const input = document.querySelector("#autocomplete");
+  if (input && formatted) {
+    input.value = formatted;
+  }
+
+  if (typeof updateVisibleOffices === "function") updateVisibleOffices();
+  if (typeof cardActionsSearch === "function") cardActionsSearch();
+}
+
 //Mapbox Functionality
 function mapboxLocations() {
   //Get region query parameter
@@ -294,54 +326,26 @@ function mapboxLocations() {
 
         const geocoder = new google.maps.Geocoder();
         geocoder.geocode(
-          {
-            location: {
-              lat: e.coords.latitude,
-              lng: e.coords.longitude,
-            },
-          },
+          { location: { lat: coords[1], lng: coords[0] } },
           (results, status) => {
             if (status === "OK" && results[0]) {
               const components = results[0].address_components;
-
-              let city = "";
-              let state = "";
-              let country = "";
+              let city = "",
+                state = "",
+                country = "";
 
               components.forEach((comp) => {
-                if (comp.types.includes("locality")) {
-                  city = comp.long_name;
-                }
-                if (comp.types.includes("administrative_area_level_1")) {
+                if (comp.types.includes("locality")) city = comp.long_name;
+                if (comp.types.includes("administrative_area_level_1"))
                   state = comp.short_name;
-                }
-                if (comp.types.includes("country")) {
-                  country = comp.long_name;
-                }
+                if (comp.types.includes("country")) country = comp.long_name;
               });
 
               const formatted = [city, state, country]
                 .filter(Boolean)
                 .join(", ");
 
-              window.userSearchCityRegion = formatted;
-
-              const input = document.querySelector("#autocomplete");
-              if (input) {
-                input.value = formatted;
-              } else {
-                console.warn(
-                  "[Geocode] Search input (#autocomplete) not found."
-                );
-              }
-
-              updateVisibleOffices();
-              cardActionsSearch();
-            } else {
-              console.warn(
-                "[Geocode] No results or failed with status:",
-                status
-              );
+              setLocation({ coords, formatted });
             }
           }
         );
@@ -1248,119 +1252,40 @@ function mapboxLocations() {
         );
 
         if (nearestLocation) {
-          console.log(
-            "[Closest Location] Found nearestLocation:",
-            nearestLocation
-          );
           closest_location_btn.show();
-
           closest_location_btn.on("click", function () {
-            console.log("[Closest Location] Button clicked");
-            window.isOutOfBounds = true;
-            modalShown = true;
             modal.fadeOut().removeClass("modal-open").addClass("hidden");
-
             const coords = nearestLocation.geometry.coordinates;
-            console.log("[Closest Location] Coordinates:", coords);
 
-            mapgl.flyTo({
-              center: coords,
-              zoom: 9,
-            });
-            console.log("[Closest Location] Map flying to:", coords);
+            mapgl.flyTo({ center: coords, zoom: 9 });
 
-            // Reverse-geocode nearest location
             const geocoder = new google.maps.Geocoder();
-            console.log("[Closest Location] Starting reverse geocode...");
-
             geocoder.geocode(
-              {
-                location: {
-                  lat: coords[1], // [lng, lat] => lat
-                  lng: coords[0], // [lng, lat] => lng
-                },
-              },
+              { location: { lat: coords[1], lng: coords[0] } },
               (results, status) => {
-                console.log(
-                  "[Closest Location] Geocode status:",
-                  status,
-                  results
-                );
-
                 if (status === "OK" && results[0]) {
                   const components = results[0].address_components;
-                  console.log(
-                    "[Closest Location] Address components:",
-                    components
-                  );
-
-                  let city = "";
-                  let state = "";
-                  let country = "";
+                  let city = "",
+                    state = "",
+                    country = "";
 
                   components.forEach((comp) => {
-                    if (comp.types.includes("locality")) {
-                      city = comp.long_name;
-                      console.log("[Closest Location] City:", city);
-                    }
-                    if (comp.types.includes("administrative_area_level_1")) {
+                    if (comp.types.includes("locality")) city = comp.long_name;
+                    if (comp.types.includes("administrative_area_level_1"))
                       state = comp.short_name;
-                      console.log("[Closest Location] State:", state);
-                    }
-                    if (comp.types.includes("country")) {
+                    if (comp.types.includes("country"))
                       country = comp.long_name;
-                      console.log("[Closest Location] Country:", country);
-                    }
                   });
 
                   const formatted = [city, state, country]
                     .filter(Boolean)
                     .join(", ");
-                  console.log(
-                    "[Closest Location] Formatted address:",
-                    formatted
-                  );
 
-                  // Save for consistency
-                  window.userSearchCityRegion = formatted;
-                  window.userSearchLongLat = coords;
-                  console.log("[Closest Location] Saved search info:", {
-                    userSearchCityRegion: formatted,
-                    userSearchLongLat: coords,
-                  });
-
-                  // Update the input field
-                  const input = document.querySelector("#autocomplete");
-                  if (input) {
-                    input.value = formatted;
-                    console.log("[Closest Location] Input updated:", formatted);
-                  } else {
-                    console.warn(
-                      "[Closest Location] Autocomplete input not found"
-                    );
-                  }
-
-                  // Refresh office list + actions
-                  console.log("[Closest Location] Updating visible offices...");
-                  updateVisibleOffices();
-                  console.log(
-                    "[Closest Location] Running card actions search..."
-                  );
-                  cardActionsSearch();
-                } else {
-                  console.warn(
-                    "[Closest Location] Reverse geocode failed:",
-                    status
-                  );
+                  setLocation({ coords, formatted });
                 }
               }
             );
           });
-        } else {
-          console.warn(
-            "[Closest Location] No nearestLocation found, hiding button"
-          );
-          closest_location_btn.hide();
         }
       }
     });
