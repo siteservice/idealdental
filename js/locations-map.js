@@ -196,23 +196,23 @@ function FlyToLocation(zoom = 11, mapInstance, location) {
  * @param {mapboxgl.Map} mapInstance
  * @param {[number, number]} coords - [lng, lat]
  */
-function RenderUserMarker(mapInstance, coords) {
+function renderUserMarker(mapInstance, coords) {
   if (!coords || coords.length !== 2) return;
 
   // If marker exists, just update its position
-  if (userMarker) {
-    userMarker.setLngLat(coords);
+  if (window.userMarker) {
+    window.userMarker.setLngLat(coords);
+    console.log("[renderUserMarker] Updated marker to:", coords);
   } else {
     // Otherwise, create a new marker
-    userMarker = new mapboxgl.Marker({
-      color: "#007aff", // optional: color of the marker
+    window.userMarker = new mapboxgl.Marker({
+      color: "#007aff",
       scale: 1.2,
     })
       .setLngLat(coords)
       .addTo(mapInstance);
+    console.log("[renderUserMarker] Created marker at:", coords);
   }
-
-  console.log("[renderUserMarker] Marker placed at:", coords);
 }
 
 //Mapbox Functionality
