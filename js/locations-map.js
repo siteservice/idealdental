@@ -130,11 +130,25 @@ const locationState = {
 };
 
 /**
+ * Update the input value with the formatted location
+ * @param {*} formatted
+ */
+function UpdateInputValue(formatted) {
+  const input = document.querySelector("#autocomplete");
+  if (input && formatted) {
+    input.value = formatted;
+    console.log("[UpdateInputValue] Updated:", formatted);
+  } else {
+    console.error("[UpdateInputValue] input or formatted address not found!");
+  }
+}
+
+/**
  * Update the location state and sync with map + input
  * @param {[number, number]} coords - Lng, Lat coordinates
  * @param {string} formatted - City, State, Country formatted string
  */
-function setLocation({ coords, formatted }) {
+function SetLocation({ coords, formatted }) {
   if (coords) {
     locationState.coords = coords;
     window.userSearchLongLat = coords;
@@ -157,15 +171,18 @@ function setLocation({ coords, formatted }) {
 
 /**
  * Get the currently set user location
- * @returns {[number, number] | null} [lng, lat] or null if not set
+ * @returns {{coords: [number, number], formatted: string} | null}
  */
-function getUserLocation() {
+function GetUserLocation() {
   const coords = window.userLongLat;
+  const formatted = window.userSearchCityRegion;
+
   if (!coords || coords.length !== 2) {
-    console.warn("[getUserLocation] No location set.");
+    console.warn("[GetUserLocation] No location set.");
     return null;
   }
-  return coords;
+
+  return { coords, formatted };
 }
 
 /**
@@ -175,7 +192,7 @@ function getUserLocation() {
  * @param {[number, number]} [location] - Optional [lng, lat] coordinates to fly to
  */
 function FlyToLocation(zoom = 11, mapInstance, location) {
-  const coords = location || getUserLocation();
+  const coords = location || GetUserLocation();
 
   if (!coords || coords.length !== 2) {
     console.warn("[FlyToLocation] No location set.");
@@ -416,17 +433,13 @@ function mapboxLocations() {
     document
       .querySelector(".current-location-action")
       .addEventListener("click", function () {
-        const geolocateBtn = document.querySelector(".mapboxgl-ctrl-geolocate");
-        if (geolocateBtn) {
-          // geolocateBtn.classList.add("hidden");
-          // geolocateBtn.click();
-
-          // Get user's current location:
-
-          FlyToLocation(11, mapgl);
-          RenderUserMarker(mapgl, userLongLat);
+        const userLocation = GetUserLocation();
+        if (userLocation) {
+          FlyToLocation(11, mapgl, userLocation.coords);
+          RenderUserMarker(mapgl, userLocation.coords);
+          UpdateInputValue(userLocation.formatted);
         } else {
-          console.error("Geolocate button not found");
+          console.warn("No user location available");
         }
       });
 
@@ -1356,7 +1369,7 @@ function mapboxLocations() {
                     .join(", ");
                   console.log("[Formatted Address]", formatted);
 
-                  setLocation({ coords, formatted });
+                  SetLocation({ coords, formatted });
                   console.log("[setLocation Called]", { coords, formatted });
                 } else {
                   console.warn("[Geocoder Failed]", status);
