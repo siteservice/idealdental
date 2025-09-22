@@ -192,25 +192,30 @@ function FlyToLocation(zoom = 11, mapInstance, location) {
 }
 
 /**
- * Render or update the user location marker
+ * Render or update the user location marker with a custom div
  * @param {mapboxgl.Map} mapInstance
  * @param {[number, number]} coords - [lng, lat]
  */
 function RenderUserMarker(mapInstance, coords) {
   if (!coords || coords.length !== 2) return;
 
-  // If marker exists, just update its position
+  const el = document.createElement("div");
+  el.className = "mapboxgl-user-location-dot";
+
   if (window.userMarker) {
     window.userMarker.setLngLat(coords);
+
+    if (window.userMarker.getElement() !== el) {
+      window.userMarker.getElement().replaceWith(el);
+      window.userMarker.setElement(el);
+    }
+
     console.log("[RenderUserMarker] Updated marker to:", coords);
   } else {
-    // Otherwise, create a new marker
-    window.userMarker = new mapboxgl.Marker({
-      color: "#007aff",
-      scale: 1.2,
-    })
+    window.userMarker = new mapboxgl.Marker(el)
       .setLngLat(coords)
       .addTo(mapInstance);
+
     console.log("[RenderUserMarker] Created marker at:", coords);
   }
 }
