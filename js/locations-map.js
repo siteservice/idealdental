@@ -145,14 +145,33 @@ function setLocation({ coords, formatted }) {
   console.log("[LocationManager] Updated:", locationState);
 
   const input = document.querySelector("#autocomplete");
-  console.log("[LocationManager] Input:", input);
   if (input && formatted) {
-    console.log("[LocationManager] Input:", input);
     input.value = formatted;
   }
 
   if (typeof updateVisibleOffices === "function") updateVisibleOffices();
   if (typeof cardActionsSearch === "function") cardActionsSearch();
+}
+
+/**
+ * Function to fly to the current location
+ * @param {*} zoom
+ * @returns
+ */
+function flyToCurrentLocation(zoom = 11) {
+  if (!window.userSearchLongLat || window.userSearchLongLat.length !== 2) {
+    console.warn("[flyToCurrentLocation] No current location set.");
+    return;
+  }
+
+  const coords = window.userSearchLongLat; // [lng, lat]
+  console.log("[flyToCurrentLocation] Flying to:", coords);
+
+  mapgl.flyTo({
+    center: coords,
+    essential: true,
+    zoom: zoom,
+  });
 }
 
 //Mapbox Functionality
@@ -314,10 +333,8 @@ function mapboxLocations() {
         positionOptions: {
           enableHighAccuracy: true,
         },
-        // When active the map will receive updates to the device's location as it changes.
-        trackUserLocation: true,
-        // Draw an arrow next to the location dot to indicate which direction the device is heading.
-        showUserHeading: true,
+        trackUserLocation: true, // When active the map will receive updates to the device's location as it changes.
+        showUserHeading: true, // Draw an arrow next to the location dot to indicate which direction the device is heading.
       }).on("geolocate", function (e) {
         const coords = [e.coords.longitude, e.coords.latitude];
         mapgl.flyTo({
@@ -358,8 +375,9 @@ function mapboxLocations() {
       .addEventListener("click", function () {
         const geolocateBtn = document.querySelector(".mapboxgl-ctrl-geolocate");
         if (geolocateBtn) {
-          geolocateBtn.classList.add("hidden");
-          geolocateBtn.click();
+          // geolocateBtn.classList.add("hidden");
+          // geolocateBtn.click();
+          flyToCurrentLocation();
         } else {
           console.error("Geolocate button not found");
         }
