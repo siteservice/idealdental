@@ -180,49 +180,59 @@ function SetLocation({ coords, formatted }) {
 }
 
 /**
- * Get the currently set user location with reverse geocoding
- * @param {[number, number]} coords [lng, lat]
- * @returns {Promise<{coords: [number, number], formatted: string} | null>}
+ * Get the currently set user location
+ * @returns {coords: [number, number] | null}
  */
-function GetUserLocation(coords = window.userLongLat) {
-  return new Promise((resolve, reject) => {
-    if (!coords || coords.length !== 2) {
-      console.warn("[GetUserLocation] No coords set.");
-      return resolve(null);
-    }
+function GetUserLocation() {
+  const coords = window.userLongLat;
 
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode(
-      { location: { lat: parseFloat(coords[1]), lng: parseFloat(coords[0]) } },
-      (results, status) => {
-        // console.log("[Geocoder Status]", status, results);
+  console.log("[GetUserLocation] coords:", coords);
 
-        if (status === "OK" && results[0]) {
-          const components = results[0].address_components;
-          let city = "",
-            state = "",
-            country = "";
+  if (!coords || coords.length !== 2) {
+    console.warn("[GetUserLocation] No location set.");
+    return null;
+  }
 
-          components.forEach((comp) => {
-            if (comp.types.includes("locality")) city = comp.long_name;
-            if (comp.types.includes("administrative_area_level_1"))
-              state = comp.short_name; // or comp.long_name if you prefer full
-            if (comp.types.includes("country")) country = comp.long_name;
-          });
+  return coords;
+}
 
-          const formatted = [city, state, country].filter(Boolean).join(", ");
-          // console.log("[Formatted Address]", formatted);
+/**
+ * Function to get formatted address by coordinates
+ * @param {*} coords - Lng, Lat coordinates
+ * @returns {string | null}
+ */
+function GetFormattedAddressByCoords(coords) {
+  const geocoder = new google.maps.Geocoder();
+  geocoder.geocode(
+    { location: { lat: coords[1], lng: coords[0] } },
+    (results, status) => {
+      console.log("[Geocoder Status]", status, results);
 
-          const location = { coords, formatted };
-          window.userSearchCityRegion = formatted; // optional caching
-          resolve(location);
-        } else {
-          console.warn("[Geocoder Failed]", status);
-          resolve({ coords, formatted: "" });
-        }
+      if (status === "OK" && results[0]) {
+        const components = results[0].address_components;
+        console.log("[Address Components]", components);
+
+        let city = "",
+          state = "",
+          country = "";
+
+        components.forEach((comp) => {
+          if (comp.types.includes("locality")) city = comp.long_name;
+          if (comp.types.includes("administrative_area_level_1"))
+            state = comp.short_name;
+          if (comp.types.includes("country")) country = comp.long_name;
+        });
+
+        const formatted = [city, state, country].filter(Boolean).join(", ");
+        console.log("[Formatted Address]", formatted);
+
+        return formatted;
+      } else {
+        console.warn("[Geocoder Failed]", status);
+        return null;
       }
-    );
-  });
+    }
+  );
 }
 
 /**
@@ -477,9 +487,16 @@ function mapboxLocations() {
         const userLocation = GetUserLocation();
         console.log("userLocation", userLocation);
         if (userLocation) {
-          FlyToLocation(11, mapgl, userLocation.coords);
-          RenderUserMarker(mapgl, userLocation.coords);
-          UpdateInputValue(userLocation.formatted);
+          FlyToLocation(11, mapgl, userLocation);
+          RenderUserMarker(mapgl, userLocation);
+
+          const formatted = GetFormattedAddressByCoords(userLocation);
+
+          if (formatted) {
+            UpdateInputValue(formatted);
+          } else {
+            console.warn("No formatted address available");
+          }
         } else {
           console.warn("No user location available");
         }
