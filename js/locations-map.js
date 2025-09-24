@@ -448,6 +448,7 @@ function mapboxLocations() {
       .addEventListener("click", function () {
         const userLocation = GetUserLocation();
         if (userLocation) {
+          console.log("userLocation", userLocation);
           FlyToLocation(11, mapgl, userLocation.coords);
           RenderUserMarker(mapgl, userLocation.coords);
           UpdateInputValue(userLocation.formatted);
