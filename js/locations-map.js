@@ -195,7 +195,7 @@ function GetUserLocation(coords = window.userLongLat) {
     geocoder.geocode(
       { location: { lat: parseFloat(coords[1]), lng: parseFloat(coords[0]) } },
       (results, status) => {
-        console.log("[Geocoder Status]", status, results);
+        // console.log("[Geocoder Status]", status, results);
 
         if (status === "OK" && results[0]) {
           const components = results[0].address_components;
@@ -211,7 +211,7 @@ function GetUserLocation(coords = window.userLongLat) {
           });
 
           const formatted = [city, state, country].filter(Boolean).join(", ");
-          console.log("[Formatted Address]", formatted);
+          // console.log("[Formatted Address]", formatted);
 
           const location = { coords, formatted };
           window.userSearchCityRegion = formatted; // optional caching
@@ -475,6 +475,7 @@ function mapboxLocations() {
       .querySelector(".current-location-action")
       .addEventListener("click", function () {
         const userLocation = GetUserLocation();
+        console.log("userLocation", userLocation);
         if (userLocation) {
           FlyToLocation(11, mapgl, userLocation.coords);
           RenderUserMarker(mapgl, userLocation.coords);
