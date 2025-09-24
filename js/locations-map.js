@@ -180,52 +180,49 @@ function SetLocation({ coords, formatted }) {
 }
 
 /**
- * Get the currently set user location
- * Uses Mapbox reverse geocoding to build a "City, State/Province, Country" string
+ * Get the currently set user location with reverse geocoding
+ * @param {[number, number]} coords [lng, lat]
  * @returns {Promise<{coords: [number, number], formatted: string} | null>}
  */
-async function GetUserLocation() {
-  const coords = window.userLongLat;
-
-  if (!coords || coords.length !== 2) {
-    console.warn("[GetUserLocation] No location set.");
-    return null;
-  }
-
-  const [lng, lat] = coords.map(parseFloat);
-
-  try {
-    const res = await fetch(
-      `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_ACCESS_TOKEN}`
-    );
-    const data = await res.json();
-
-    if (data.features && data.features.length > 0) {
-      // Find the context pieces: city, state/province, country
-      const context = data.features[0].context || [];
-      let city = "",
-        region = "",
-        country = "";
-
-      for (const c of context) {
-        if (c.id.startsWith("place")) city = c.text;
-        if (c.id.startsWith("region")) region = c.text;
-        if (c.id.startsWith("country")) country = c.text;
-      }
-
-      const formatted = [city, region, country].filter(Boolean).join(", ");
-
-      console.log("[GetUserLocation] coords:", coords, "formatted:", formatted);
-
-      return { coords: [lng, lat], formatted };
-    } else {
-      console.warn("[GetUserLocation] No geocoding results.");
-      return { coords: [lng, lat], formatted: "" };
+function GetUserLocation(coords = window.userLongLat) {
+  return new Promise((resolve, reject) => {
+    if (!coords || coords.length !== 2) {
+      console.warn("[GetUserLocation] No coords set.");
+      return resolve(null);
     }
-  } catch (err) {
-    console.error("[GetUserLocation] Reverse geocoding failed:", err);
-    return { coords: [lng, lat], formatted: "" };
-  }
+
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode(
+      { location: { lat: parseFloat(coords[1]), lng: parseFloat(coords[0]) } },
+      (results, status) => {
+        console.log("[Geocoder Status]", status, results);
+
+        if (status === "OK" && results[0]) {
+          const components = results[0].address_components;
+          let city = "",
+            state = "",
+            country = "";
+
+          components.forEach((comp) => {
+            if (comp.types.includes("locality")) city = comp.long_name;
+            if (comp.types.includes("administrative_area_level_1"))
+              state = comp.short_name; // or comp.long_name if you prefer full
+            if (comp.types.includes("country")) country = comp.long_name;
+          });
+
+          const formatted = [city, state, country].filter(Boolean).join(", ");
+          console.log("[Formatted Address]", formatted);
+
+          const location = { coords, formatted };
+          window.userSearchCityRegion = formatted; // optional caching
+          resolve(location);
+        } else {
+          console.warn("[Geocoder Failed]", status);
+          resolve({ coords, formatted: "" });
+        }
+      }
+    );
+  });
 }
 
 /**
