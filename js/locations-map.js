@@ -181,20 +181,51 @@ function SetLocation({ coords, formatted }) {
 
 /**
  * Get the currently set user location
- * @returns {{coords: [number, number], formatted: string} | null}
+ * Uses Mapbox reverse geocoding to build a "City, State/Province, Country" string
+ * @returns {Promise<{coords: [number, number], formatted: string} | null>}
  */
-function GetUserLocation() {
+async function GetUserLocation() {
   const coords = window.userLongLat;
-  const formatted = window.userSearchCityRegion;
-
-  console.log("[GetUserLocation] coords:", coords, "formatted:", formatted);
 
   if (!coords || coords.length !== 2) {
     console.warn("[GetUserLocation] No location set.");
     return null;
   }
 
-  return { coords, formatted };
+  const [lng, lat] = coords.map(parseFloat);
+
+  try {
+    const res = await fetch(
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_ACCESS_TOKEN}`
+    );
+    const data = await res.json();
+
+    if (data.features && data.features.length > 0) {
+      // Find the context pieces: city, state/province, country
+      const context = data.features[0].context || [];
+      let city = "",
+        region = "",
+        country = "";
+
+      for (const c of context) {
+        if (c.id.startsWith("place")) city = c.text;
+        if (c.id.startsWith("region")) region = c.text;
+        if (c.id.startsWith("country")) country = c.text;
+      }
+
+      const formatted = [city, region, country].filter(Boolean).join(", ");
+
+      console.log("[GetUserLocation] coords:", coords, "formatted:", formatted);
+
+      return { coords: [lng, lat], formatted };
+    } else {
+      console.warn("[GetUserLocation] No geocoding results.");
+      return { coords: [lng, lat], formatted: "" };
+    }
+  } catch (err) {
+    console.error("[GetUserLocation] Reverse geocoding failed:", err);
+    return { coords: [lng, lat], formatted: "" };
+  }
 }
 
 /**
@@ -448,7 +479,6 @@ function mapboxLocations() {
       .addEventListener("click", function () {
         const userLocation = GetUserLocation();
         if (userLocation) {
-          console.log("userLocation", userLocation);
           FlyToLocation(11, mapgl, userLocation.coords);
           RenderUserMarker(mapgl, userLocation.coords);
           UpdateInputValue(userLocation.formatted);
