@@ -196,6 +196,22 @@ function GetUserLocation() {
   return coords;
 }
 
+function SetSearchLocation(coords, formatted) {
+  if (coords) {
+    window.userSearchLongLat = coords;
+    window.userSearchCityRegion = formatted;
+  }
+
+  console.log("[SetSearchLocation] coords:", coords);
+
+  if (!coords || coords.length !== 2) {
+    console.warn("[SetSearchLocation] No location set.");
+    return null;
+  }
+
+  return coords;
+}
+
 /**
  * Function to get formatted address by coordinates
  * @param {[number, number]} coords - [lng, lat]
@@ -492,15 +508,18 @@ function mapboxLocations() {
     document
       .querySelector(".current-location-action")
       .addEventListener("click", async function () {
-        const userLocation = GetUserLocation();
-        if (userLocation) {
-          FlyToLocation(11, mapgl, userLocation);
-          RenderUserMarker(mapgl, userLocation);
+        const userLocationCoords = GetUserLocation();
+        if (userLocationCoords) {
+          FlyToLocation(11, mapgl, userLocationCoords);
+          RenderUserMarker(mapgl, userLocationCoords);
 
-          const formatted = await GetFormattedAddressByCoords(userLocation);
+          const userLocationFormatted = await GetFormattedAddressByCoords(
+            userLocationCoords
+          );
 
-          if (formatted) {
-            UpdateInputValue(formatted);
+          if (userLocationFormatted) {
+            UpdateInputValue(userLocationFormatted);
+            SetSearchLocation(userLocationCoords, userLocationFormatted);
           } else {
             console.warn("No formatted address available");
           }
