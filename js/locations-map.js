@@ -202,39 +202,44 @@ function GetUserLocation() {
  * @returns {Promise<string | null>}
  */
 function GetFormattedAddressByCoords(coords) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     if (!coords || coords.length !== 2) {
       console.warn("[GetFormattedAddressByCoords] Invalid coords", coords);
       return resolve(null);
     }
 
+    const lat = parseFloat(coords[1]);
+    const lng = parseFloat(coords[0]);
+
+    if (isNaN(lat) || isNaN(lng)) {
+      console.warn(
+        "[GetFormattedAddressByCoords] Coords are not numbers",
+        coords
+      );
+      return resolve(null);
+    }
+
     const geocoder = new google.maps.Geocoder();
-    geocoder.geocode(
-      { location: { lat: parseFloat(coords[1]), lng: parseFloat(coords[0]) } },
-      (results, status) => {
-        console.log("[Geocoder Status]", status, results);
+    geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+      if (status === "OK" && results[0]) {
+        let city = "",
+          state = "",
+          country = "";
 
-        if (status === "OK" && results[0]) {
-          let city = "",
-            state = "",
-            country = "";
+        results[0].address_components.forEach((comp) => {
+          if (comp.types.includes("locality")) city = comp.long_name;
+          if (comp.types.includes("administrative_area_level_1"))
+            state = comp.short_name;
+          if (comp.types.includes("country")) country = comp.long_name;
+        });
 
-          results[0].address_components.forEach((comp) => {
-            if (comp.types.includes("locality")) city = comp.long_name;
-            if (comp.types.includes("administrative_area_level_1"))
-              state = comp.short_name;
-            if (comp.types.includes("country")) country = comp.long_name;
-          });
-
-          const formatted = [city, state, country].filter(Boolean).join(", ");
-          console.log("[Formatted Address]", formatted);
-          resolve(formatted);
-        } else {
-          console.warn("[Geocoder Failed]", status);
-          resolve(null);
-        }
+        const formatted = [city, state, country].filter(Boolean).join(", ");
+        resolve(formatted);
+      } else {
+        console.warn("[Geocoder Failed]", status);
+        resolve(null);
       }
-    );
+    });
   });
 }
 
