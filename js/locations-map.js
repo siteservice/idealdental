@@ -198,41 +198,44 @@ function GetUserLocation() {
 
 /**
  * Function to get formatted address by coordinates
- * @param {*} coords - Lng, Lat coordinates
- * @returns {string | null}
+ * @param {[number, number]} coords - [lng, lat]
+ * @returns {Promise<string | null>}
  */
 function GetFormattedAddressByCoords(coords) {
-  const geocoder = new google.maps.Geocoder();
-  geocoder.geocode(
-    { location: { lat: coords[1], lng: coords[0] } },
-    (results, status) => {
-      console.log("[Geocoder Status]", status, results);
-
-      if (status === "OK" && results[0]) {
-        const components = results[0].address_components;
-        console.log("[Address Components]", components);
-
-        let city = "",
-          state = "",
-          country = "";
-
-        components.forEach((comp) => {
-          if (comp.types.includes("locality")) city = comp.long_name;
-          if (comp.types.includes("administrative_area_level_1"))
-            state = comp.short_name;
-          if (comp.types.includes("country")) country = comp.long_name;
-        });
-
-        const formatted = [city, state, country].filter(Boolean).join(", ");
-        console.log("[Formatted Address]", formatted);
-
-        return formatted;
-      } else {
-        console.warn("[Geocoder Failed]", status);
-        return null;
-      }
+  return new Promise((resolve, reject) => {
+    if (!coords || coords.length !== 2) {
+      console.warn("[GetFormattedAddressByCoords] Invalid coords", coords);
+      return resolve(null);
     }
-  );
+
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode(
+      { location: { lat: parseFloat(coords[1]), lng: parseFloat(coords[0]) } },
+      (results, status) => {
+        console.log("[Geocoder Status]", status, results);
+
+        if (status === "OK" && results[0]) {
+          let city = "",
+            state = "",
+            country = "";
+
+          results[0].address_components.forEach((comp) => {
+            if (comp.types.includes("locality")) city = comp.long_name;
+            if (comp.types.includes("administrative_area_level_1"))
+              state = comp.short_name;
+            if (comp.types.includes("country")) country = comp.long_name;
+          });
+
+          const formatted = [city, state, country].filter(Boolean).join(", ");
+          console.log("[Formatted Address]", formatted);
+          resolve(formatted);
+        } else {
+          console.warn("[Geocoder Failed]", status);
+          resolve(null);
+        }
+      }
+    );
+  });
 }
 
 /**
@@ -483,14 +486,13 @@ function mapboxLocations() {
     );
     document
       .querySelector(".current-location-action")
-      .addEventListener("click", function () {
+      .addEventListener("click", async function () {
         const userLocation = GetUserLocation();
-        console.log("userLocation", userLocation);
         if (userLocation) {
           FlyToLocation(11, mapgl, userLocation);
           RenderUserMarker(mapgl, userLocation);
 
-          const formatted = GetFormattedAddressByCoords(userLocation);
+          const formatted = await GetFormattedAddressByCoords(userLocation);
 
           if (formatted) {
             UpdateInputValue(formatted);
