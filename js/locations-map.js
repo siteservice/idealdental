@@ -180,20 +180,41 @@ function SetLocation({ coords, formatted }) {
 }
 
 /**
- * Get the currently set user location
- * @returns {coords: [number, number] | null}
+ * Get the user's current location, using cached coordinates if available.
+ * Returns a promise that resolves to [longitude, latitude] or null.
  */
 function GetUserLocation() {
-  const coords = window.userLongLat;
+  return new Promise((resolve, reject) => {
+    const cachedCoords = window.userLongLat;
+    if (cachedCoords && cachedCoords.length === 2) {
+      console.log("[GetUserLocationHybrid] Using cached coords:", cachedCoords);
+      resolve(cachedCoords);
+      return;
+    }
 
-  console.log("[GetUserLocation] coords:", coords);
+    if (!navigator.geolocation) {
+      console.warn("[GetUserLocationHybrid] Geolocation is not supported.");
+      resolve(null);
+      return;
+    }
 
-  if (!coords || coords.length !== 2) {
-    console.warn("[GetUserLocation] No location set.");
-    return null;
-  }
-
-  return coords;
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const coords = [position.coords.longitude, position.coords.latitude];
+        console.log("[GetUserLocationHybrid] Fetched coords:", coords);
+        window.userLongLat = coords; // cache it
+        resolve(coords);
+      },
+      (error) => {
+        console.warn("[GetUserLocationHybrid] Failed to get location:", error);
+        resolve(null);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 5000,
+      }
+    );
+  });
 }
 
 function SetSearchLocation(coords, formatted) {
@@ -508,7 +529,8 @@ function mapboxLocations() {
     document
       .querySelector(".current-location-action")
       .addEventListener("click", async function () {
-        const userLocationCoords = GetUserLocation();
+        const userLocationCoords = await GetUserLocation();
+
         if (userLocationCoords) {
           FlyToLocation(11, mapgl, userLocationCoords);
           RenderUserMarker(mapgl, userLocationCoords);
