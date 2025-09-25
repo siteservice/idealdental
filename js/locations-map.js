@@ -180,10 +180,19 @@ function SetLocation({ coords, formatted }) {
 }
 
 /**
- * Get the user's current location, using cached coordinates if available.
- * @param callback Function that receives [longitude, latitude] | null
+ * Get the user's current location.
+ * Checks browser support first, then cached coords, then attempts to fetch.
+ * @param {function([number, number] | null): void} callback
  */
 function GetUserLocation(callback) {
+  // Check if geolocation is supported
+  if (!navigator.geolocation) {
+    console.warn("[GetUserLocation] Geolocation is not supported.");
+    callback(null);
+    return;
+  }
+
+  // Use cached coordinates if available
   const cachedCoords = window.userLongLat;
   if (cachedCoords && cachedCoords.length === 2) {
     console.log("[GetUserLocation] Using cached coords:", cachedCoords);
@@ -191,17 +200,12 @@ function GetUserLocation(callback) {
     return;
   }
 
-  if (!navigator.geolocation) {
-    console.warn("[GetUserLocation] Geolocation is not supported.");
-    callback(null);
-    return;
-  }
-
+  // Fetch current position
   navigator.geolocation.getCurrentPosition(
     (position) => {
       const coords = [position.coords.longitude, position.coords.latitude];
       console.log("[GetUserLocation] Fetched coords:", coords);
-      window.userLongLat = coords;
+      window.userLongLat = coords; // cache
       callback(coords);
     },
     (error) => {
