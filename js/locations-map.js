@@ -526,26 +526,27 @@ function mapboxLocations() {
     );
     document
       .querySelector(".current-location-action")
-      .addEventListener("click", async function () {
-        const userLocationCoords = await GetUserLocation();
+      .addEventListener("click", function () {
+        GetUserLocation(function (userLocationCoords) {
+          if (userLocationCoords) {
+            FlyToLocation(11, mapgl, userLocationCoords);
+            RenderUserMarker(mapgl, userLocationCoords);
 
-        if (userLocationCoords) {
-          FlyToLocation(11, mapgl, userLocationCoords);
-          RenderUserMarker(mapgl, userLocationCoords);
-
-          const userLocationFormatted = await GetFormattedAddressByCoords(
-            userLocationCoords
-          );
-
-          if (userLocationFormatted) {
-            UpdateInputValue(userLocationFormatted);
-            SetSearchLocation(userLocationCoords, userLocationFormatted);
+            GetFormattedAddressByCoords(
+              userLocationCoords,
+              function (userLocationFormatted) {
+                if (userLocationFormatted) {
+                  UpdateInputValue(userLocationFormatted);
+                  SetSearchLocation(userLocationCoords, userLocationFormatted);
+                } else {
+                  console.warn("No userLocationFormatted address available");
+                }
+              }
+            );
           } else {
-            console.warn("No userLocationFormatted address available");
+            console.warn("No user location available");
           }
-        } else {
-          console.warn("No user location available");
-        }
+        });
       });
 
     if (region !== "" && acceptedRegions.includes(region)) {
