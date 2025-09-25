@@ -521,7 +521,7 @@ function mapboxLocations() {
             UpdateInputValue(userLocationFormatted);
             SetSearchLocation(userLocationCoords, userLocationFormatted);
           } else {
-            console.warn("No formatted address available");
+            console.warn("No userLocationFormatted address available");
           }
         } else {
           console.warn("No user location available");
@@ -1135,6 +1135,11 @@ function mapboxLocations() {
     renderItems(sortedVisibleFeatures);
 
     window.hasFeatures = visibleFeatures.features.length > 0;
+
+    $("office-card-wrapper").css("opacity", "1");
+    console.log(
+      "[updateVisibleOffices] Updated visible features - Office Cards set to opacity 1"
+    );
   }
 
   mapgl.on("zoomend", function (e) {
