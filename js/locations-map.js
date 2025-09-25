@@ -184,41 +184,27 @@ function SetLocation({ coords, formatted }) {
  * Returns a promise that resolves to [longitude, latitude] or null.
  */
 function GetUserLocation() {
-  return (
-    (new Promise() < [number, number]) |
-    (null >
-      ((resolve) => {
-        if (!navigator.geolocation) {
-          console.warn("[GetUserLocation] Geolocation not supported.");
-          resolve(null);
-          return;
-        }
+  return new Promise((resolve, reject) => {
+    const cachedCoords = window.userLongLat;
+    if (cachedCoords && cachedCoords.length === 2) {
+      resolve(cachedCoords);
+      return;
+    }
 
-        const cachedCoords = window.userLongLat;
-        if (cachedCoords && cachedCoords.length === 2) {
-          console.log("[GetUserLocation] Using cached coords:", cachedCoords);
-          resolve(cachedCoords);
-          return;
-        }
+    if (!navigator.geolocation) {
+      resolve(null);
+      return;
+    }
 
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const coords = [
-              position.coords.longitude,
-              position.coords.latitude,
-            ];
-            console.log("[GetUserLocation] Fetched coords:", coords);
-            window.userLongLat = coords;
-            resolve(coords);
-          },
-          (error) => {
-            console.warn("[GetUserLocation] Failed to get location:", error);
-            resolve(null);
-          },
-          { enableHighAccuracy: true, timeout: 5000 }
-        );
-      }))
-  );
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const coords = [position.coords.longitude, position.coords.latitude];
+        window.userLongLat = coords;
+        resolve(coords);
+      },
+      () => resolve(null)
+    );
+  });
 }
 
 function SetSearchLocation(coords, formatted) {
