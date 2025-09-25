@@ -525,6 +525,11 @@ function mapboxLocations() {
       .querySelector(".current-location-action")
       .addEventListener("click", function () {
         GetUserLocation(function (userLocationCoords) {
+          const container = document.querySelector(".g-autocomplete");
+
+          const existingMsg = container.querySelector(".location-error-msg");
+          if (existingMsg) existingMsg.remove();
+
           if (userLocationCoords) {
             FlyToLocation(11, mapgl, userLocationCoords);
             RenderUserMarker(mapgl, userLocationCoords);
@@ -542,6 +547,16 @@ function mapboxLocations() {
             );
           } else {
             console.warn("[GetUserLocation] No user location available");
+
+            // Create and append error message
+            const errorMsg = document.createElement("div");
+            errorMsg.className = "location-error-msg";
+            errorMsg.style.color = "red";
+            errorMsg.style.marginTop = "5px";
+            errorMsg.textContent =
+              "Location access denied. Please enter your address manually.";
+
+            container.appendChild(errorMsg);
           }
         });
       });
