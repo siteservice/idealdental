@@ -185,38 +185,43 @@ function SetLocation({ coords, formatted }) {
  * @param {function([number, number] | null): void} callback
  */
 function GetUserLocation(callback) {
-  // Check if geolocation is supported
   if (!navigator.geolocation) {
     console.warn("[GetUserLocation] Geolocation is not supported.");
     callback(null);
     return;
   }
 
-  // Use cached coordinates if available
-  const cachedCoords = window.userLongLat;
-  if (cachedCoords && cachedCoords.length === 2) {
-    console.log("[GetUserLocation] Using cached coords:", cachedCoords);
-    callback(cachedCoords);
-    return;
-  }
-
-  // Fetch current position
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      const coords = [position.coords.longitude, position.coords.latitude];
-      console.log("[GetUserLocation] Fetched coords:", coords);
-      window.userLongLat = coords; // cache
-      callback(coords);
-    },
-    (error) => {
-      console.warn("[GetUserLocation] Failed to get location:", error);
+  navigator.permissions.query({ name: "geolocation" }).then((result) => {
+    if (result.state === "denied") {
+      console.warn("[GetUserLocation] Geolocation permission denied by user.");
       callback(null);
-    },
-    {
-      enableHighAccuracy: true,
-      timeout: 5000,
+      return;
     }
-  );
+
+    const cachedCoords = window.userLongLat;
+    if (cachedCoords && cachedCoords.length === 2) {
+      console.log("[GetUserLocation] Using cached coords:", cachedCoords);
+      callback(cachedCoords);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const coords = [position.coords.longitude, position.coords.latitude];
+        console.log("[GetUserLocation] Fetched coords:", coords);
+        window.userLongLat = coords; // cache
+        callback(coords);
+      },
+      (error) => {
+        console.warn("[GetUserLocation] Failed to get location:", error);
+        callback(null);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 5000,
+      }
+    );
+  });
 }
 
 function SetSearchLocation(coords, formatted) {
