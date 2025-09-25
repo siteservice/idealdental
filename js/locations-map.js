@@ -478,49 +478,49 @@ function mapboxLocations() {
         showCompass: false,
       })
     );
-    mapgl.addControl(
-      new mapboxgl.GeolocateControl({
-        positionOptions: {
-          enableHighAccuracy: true,
-        },
-        trackUserLocation: true, // When active the map will receive updates to the device's location as it changes.
-        showUserHeading: true, // Draw an arrow next to the location dot to indicate which direction the device is heading.
-      }).on("geolocate", function (e) {
-        console.log("[GeolocateControl Event]", e);
-        // const coords = [e.coords.longitude, e.coords.latitude];
-        // mapgl.flyTo({
-        //   center: coords,
-        //   essential: true,
-        //   zoom: zoomLocAllowed,
-        // });
+    // mapgl.addControl(
+    //   new mapboxgl.GeolocateControl({
+    //     positionOptions: {
+    //       enableHighAccuracy: true,
+    //     },
+    //     trackUserLocation: true, // When active the map will receive updates to the device's location as it changes.
+    //     showUserHeading: true, // Draw an arrow next to the location dot to indicate which direction the device is heading.
+    //   }).on("geolocate", function (e) {
+    //     console.log("[GeolocateControl Event]", e);
+    //     const coords = [e.coords.longitude, e.coords.latitude];
+    //     mapgl.flyTo({
+    //       center: coords,
+    //       essential: true,
+    //       zoom: zoomLocAllowed,
+    //     });
 
-        // const geocoder = new google.maps.Geocoder();
-        // geocoder.geocode(
-        //   { location: { lat: coords[1], lng: coords[0] } },
-        //   (results, status) => {
-        //     if (status === "OK" && results[0]) {
-        //       const components = results[0].address_components;
-        //       let city = "",
-        //         state = "",
-        //         country = "";
+    //     const geocoder = new google.maps.Geocoder();
+    //     geocoder.geocode(
+    //       { location: { lat: coords[1], lng: coords[0] } },
+    //       (results, status) => {
+    //         if (status === "OK" && results[0]) {
+    //           const components = results[0].address_components;
+    //           let city = "",
+    //             state = "",
+    //             country = "";
 
-        //       components.forEach((comp) => {
-        //         if (comp.types.includes("locality")) city = comp.long_name;
-        //         if (comp.types.includes("administrative_area_level_1"))
-        //           state = comp.short_name;
-        //         if (comp.types.includes("country")) country = comp.long_name;
-        //       });
+    //           components.forEach((comp) => {
+    //             if (comp.types.includes("locality")) city = comp.long_name;
+    //             if (comp.types.includes("administrative_area_level_1"))
+    //               state = comp.short_name;
+    //             if (comp.types.includes("country")) country = comp.long_name;
+    //           });
 
-        //       const formatted = [city, state, country]
-        //         .filter(Boolean)
-        //         .join(", ");
+    //           const formatted = [city, state, country]
+    //             .filter(Boolean)
+    //             .join(", ");
 
-        //       setLocation({ coords, formatted });
-        //     }
-        //   }
-        // );
-      })
-    );
+    //           setLocation({ coords, formatted });
+    //         }
+    //       }
+    //     );
+    //   })
+    // );
     document
       .querySelector(".current-location-action")
       .addEventListener("click", function () {
@@ -552,9 +552,9 @@ function mapboxLocations() {
             const errorMsg = document.createElement("div");
             errorMsg.className = "location-error-msg";
             errorMsg.style.color = "red";
-            errorMsg.style.marginTop = "5px";
+            errorMsg.style.marginTop = "10px";
             errorMsg.textContent =
-              "Location access denied. Please enter your address manually.";
+              "Location access denied. Please allow location access in your browser settings.";
 
             container.appendChild(errorMsg);
           }
