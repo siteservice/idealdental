@@ -181,30 +181,38 @@ function SetLocation({ coords, formatted }) {
 
 /**
  * Get the user's current location, using cached coordinates if available.
- * Returns a promise that resolves to [longitude, latitude] or null.
+ * @param callback Function that receives [longitude, latitude] | null
  */
-function GetUserLocation() {
-  return new Promise((resolve, reject) => {
-    const cachedCoords = window.userLongLat;
-    if (cachedCoords && cachedCoords.length === 2) {
-      resolve(cachedCoords);
-      return;
-    }
+function GetUserLocation(callback) {
+  const cachedCoords = window.userLongLat;
+  if (cachedCoords && cachedCoords.length === 2) {
+    console.log("[GetUserLocation] Using cached coords:", cachedCoords);
+    callback(cachedCoords);
+    return;
+  }
 
-    if (!navigator.geolocation) {
-      resolve(null);
-      return;
-    }
+  if (!navigator.geolocation) {
+    console.warn("[GetUserLocation] Geolocation is not supported.");
+    callback(null);
+    return;
+  }
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const coords = [position.coords.longitude, position.coords.latitude];
-        window.userLongLat = coords;
-        resolve(coords);
-      },
-      () => resolve(null)
-    );
-  });
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const coords = [position.coords.longitude, position.coords.latitude];
+      console.log("[GetUserLocation] Fetched coords:", coords);
+      window.userLongLat = coords;
+      callback(coords);
+    },
+    (error) => {
+      console.warn("[GetUserLocation] Failed to get location:", error);
+      callback(null);
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 5000,
+    }
+  );
 }
 
 function SetSearchLocation(coords, formatted) {
