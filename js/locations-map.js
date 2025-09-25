@@ -552,7 +552,7 @@ function mapboxLocations() {
             const errorMsg = document.createElement("div");
             errorMsg.className = "location-error-msg";
             errorMsg.style.color = "red";
-            errorMsg.style.marginTop = "10px";
+            errorMsg.style.marginbottom = "10px";
             errorMsg.textContent =
               "Location access denied. Please allow location access in your browser settings.";
 
