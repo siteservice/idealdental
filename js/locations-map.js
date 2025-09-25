@@ -1136,7 +1136,7 @@ function mapboxLocations() {
 
     window.hasFeatures = visibleFeatures.features.length > 0;
 
-    $("office-card-wrapper").css("opacity", "1");
+    $(".office-card-wrapper").css("opacity", "1");
     console.log(
       "[updateVisibleOffices] Updated visible features - Office Cards set to opacity 1"
     );
