@@ -196,9 +196,20 @@ function GetUserLocation(callback, forceRefresh = false) {
   }
 
   // Use cached coords if available
-  if (!forceRefresh && window.userLongLat && window.userLongLat.length === 2) {
-    console.log("[GetUserLocation] Using cached coords:", window.userLongLat);
-    callback(window.userLongLat, null);
+  if (
+    !forceRefresh &&
+    window.userLongLat &&
+    window.userLongLat.length === 2 &&
+    window.navigator.permissions
+  ) {
+    navigator.permissions.query({ name: "geolocation" }).then((perm) => {
+      if (perm.state === "granted") {
+        callback(window.userLongLat, null);
+      } else {
+        // Force geolocation API to check current permission
+        getGeo();
+      }
+    });
     return;
   }
 
