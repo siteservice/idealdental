@@ -181,47 +181,54 @@ function SetLocation({ coords, formatted }) {
 
 /**
  * Get the user's current location.
- * Checks browser support first, then cached coords, then attempts to fetch.
- * @param {function([number, number] | null): void} callback
+ * Uses cached coords if available unless forceRefresh = true.
+ * Otherwise calls geolocation API, which will trigger the browser
+ * prompt if permission is undecided.
+ *
+ * @param {function([number, number] | null, GeolocationPositionError | null): void} callback
+ * @param {boolean} forceRefresh - bypass cached coords
  */
-function GetUserLocation(callback) {
+function GetUserLocation(callback, forceRefresh = false) {
   if (!navigator.geolocation) {
     console.warn("[GetUserLocation] Geolocation is not supported.");
-    callback(null);
+    callback(null, null);
     return;
   }
 
-  navigator.permissions.query({ name: "geolocation" }).then((result) => {
-    if (result.state === "denied") {
-      console.warn("[GetUserLocation] Geolocation permission denied by user.");
-      callback(null);
-      return;
-    }
+  // Use cached coords if available
+  if (!forceRefresh && window.userLongLat && window.userLongLat.length === 2) {
+    console.log("[GetUserLocation] Using cached coords:", window.userLongLat);
+    callback(window.userLongLat, null);
+    return;
+  }
 
-    const cachedCoords = window.userLongLat;
-    if (cachedCoords && cachedCoords.length === 2) {
-      console.log("[GetUserLocation] Using cached coords:", cachedCoords);
-      callback(cachedCoords);
-      return;
-    }
+  // Always try geolocation → triggers popup if undecided
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const coords = [position.coords.longitude, position.coords.latitude];
+      console.log("[GetUserLocation] Fetched coords:", coords);
+      window.userLongLat = coords; // cache
+      callback(coords, null);
+    },
+    (error) => {
+      console.warn("[GetUserLocation] Failed to get location:", error);
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const coords = [position.coords.longitude, position.coords.latitude];
-        console.log("[GetUserLocation] Fetched coords:", coords);
-        window.userLongLat = coords; // cache
-        callback(coords);
-      },
-      (error) => {
-        console.warn("[GetUserLocation] Failed to get location:", error);
-        callback(null);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 5000,
+      // Distinguish types of errors
+      if (error.code === error.PERMISSION_DENIED) {
+        console.warn("[GetUserLocation] Permission denied by user.");
+      } else if (error.code === error.POSITION_UNAVAILABLE) {
+        console.warn("[GetUserLocation] Position unavailable.");
+      } else if (error.code === error.TIMEOUT) {
+        console.warn("[GetUserLocation] Request timed out.");
       }
-    );
-  });
+
+      callback(null, error);
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 5000,
+    }
+  );
 }
 
 function SetSearchLocation(coords, formatted) {
@@ -329,6 +336,8 @@ function RenderUserMarker(mapInstance, coords) {
  */
 function HandleUserLocation(mapgl) {
   GetUserLocation(function (userLocationCoords) {
+    console.log("[HandleUserLocation] Handling user location - start");
+
     const container = document.querySelector(".g-autocomplete");
 
     // Remove existing error message if present
@@ -347,8 +356,14 @@ function HandleUserLocation(mapgl) {
           if (userLocationFormatted) {
             UpdateInputValue(userLocationFormatted);
             SetSearchLocation(userLocationCoords, userLocationFormatted);
+            console.log(
+              "[HandleUserLocation] Handling user location - success"
+            );
           } else {
             console.warn("No userLocationFormatted address available");
+            console.warn(
+              "[HandleUserLocation] Handling user location - fail -> No userLocationFormatted address available"
+            );
           }
         }
       );
@@ -364,6 +379,10 @@ function HandleUserLocation(mapgl) {
         "Location access denied. Please allow location access in your browser settings.";
 
       container.appendChild(errorMsg);
+
+      console.warn(
+        "[HandleUserLocation] Handling user location - fail -> Please allow location access in your browser settings."
+      );
     }
   });
 }
