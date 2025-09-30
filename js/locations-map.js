@@ -322,6 +322,51 @@ function RenderUserMarker(mapInstance, coords) {
     console.log("[RenderUserMarker] Updated marker to:", coords);
   }
 }
+
+/**
+ * Handle user location
+ * @param {mapboxgl.Map} mapgl
+ */
+function HandleUserLocation(mapgl) {
+  GetUserLocation(function (userLocationCoords) {
+    const container = document.querySelector(".g-autocomplete");
+
+    // Remove existing error message if present
+    const existingMsg = container.querySelector(".location-error-msg");
+    if (existingMsg) existingMsg.remove();
+
+    if (userLocationCoords) {
+      // Fly to location and render marker
+      FlyToLocation(11, mapgl, userLocationCoords);
+      RenderUserMarker(mapgl, userLocationCoords);
+
+      // Reverse geocode to formatted address
+      GetFormattedAddressByCoords(
+        userLocationCoords,
+        function (userLocationFormatted) {
+          if (userLocationFormatted) {
+            UpdateInputValue(userLocationFormatted);
+            SetSearchLocation(userLocationCoords, userLocationFormatted);
+          } else {
+            console.warn("No userLocationFormatted address available");
+          }
+        }
+      );
+    } else {
+      console.warn("[GetUserLocation] No user location available");
+
+      // Create and append error message
+      const errorMsg = document.createElement("div");
+      errorMsg.className = "location-error-msg";
+      errorMsg.style.color = "red";
+      errorMsg.style.marginBottom = "10px";
+      errorMsg.textContent =
+        "Location access denied. Please allow location access in your browser settings.";
+
+      container.appendChild(errorMsg);
+    }
+  });
+}
 // #endregion
 
 //Mapbox Functionality
@@ -524,41 +569,7 @@ function mapboxLocations() {
     document
       .querySelector(".current-location-action")
       .addEventListener("click", function () {
-        GetUserLocation(function (userLocationCoords) {
-          const container = document.querySelector(".g-autocomplete");
-
-          const existingMsg = container.querySelector(".location-error-msg");
-          if (existingMsg) existingMsg.remove();
-
-          if (userLocationCoords) {
-            FlyToLocation(11, mapgl, userLocationCoords);
-            RenderUserMarker(mapgl, userLocationCoords);
-
-            GetFormattedAddressByCoords(
-              userLocationCoords,
-              function (userLocationFormatted) {
-                if (userLocationFormatted) {
-                  UpdateInputValue(userLocationFormatted);
-                  SetSearchLocation(userLocationCoords, userLocationFormatted);
-                } else {
-                  console.warn("No userLocationFormatted address available");
-                }
-              }
-            );
-          } else {
-            console.warn("[GetUserLocation] No user location available");
-
-            // Create and append error message
-            const errorMsg = document.createElement("div");
-            errorMsg.className = "location-error-msg";
-            errorMsg.style.color = "red";
-            errorMsg.style.marginbottom = "10px";
-            errorMsg.textContent =
-              "Location access denied. Please allow location access in your browser settings.";
-
-            container.appendChild(errorMsg);
-          }
-        });
+        HandleUserLocation(mapgl);
       });
 
     if (region !== "" && acceptedRegions.includes(region)) {
@@ -595,41 +606,7 @@ function mapboxLocations() {
       //   zoom: zoomLocAllowed,
       // });
 
-      GetUserLocation(function (userLocationCoords) {
-        const container = document.querySelector(".g-autocomplete");
-
-        const existingMsg = container.querySelector(".location-error-msg");
-        if (existingMsg) existingMsg.remove();
-
-        if (userLocationCoords) {
-          FlyToLocation(11, mapgl, userLocationCoords);
-          RenderUserMarker(mapgl, userLocationCoords);
-
-          GetFormattedAddressByCoords(
-            userLocationCoords,
-            function (userLocationFormatted) {
-              if (userLocationFormatted) {
-                UpdateInputValue(userLocationFormatted);
-                SetSearchLocation(userLocationCoords, userLocationFormatted);
-              } else {
-                console.warn("No userLocationFormatted address available");
-              }
-            }
-          );
-        } else {
-          console.warn("[GetUserLocation] No user location available");
-
-          // Create and append error message
-          const errorMsg = document.createElement("div");
-          errorMsg.className = "location-error-msg";
-          errorMsg.style.color = "red";
-          errorMsg.style.marginbottom = "10px";
-          errorMsg.textContent =
-            "Location access denied. Please allow location access in your browser settings.";
-
-          container.appendChild(errorMsg);
-        }
-      });
+      HandleUserLocation(mapgl);
     }
   });
 
