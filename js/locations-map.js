@@ -206,7 +206,6 @@ function GetUserLocation(callback, forceRefresh = false) {
       if (perm.state === "granted") {
         callback(window.userLongLat, null);
       } else {
-        // Force geolocation API to check current permission
         getGeo();
       }
     });
