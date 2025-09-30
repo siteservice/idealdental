@@ -195,6 +195,22 @@ function GetUserLocation(callback, forceRefresh = false) {
     return;
   }
 
+  function fetchGeo() {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const coords = [position.coords.longitude, position.coords.latitude];
+        console.log("[GetUserLocation] Fetched coords:", coords);
+        window.userLongLat = coords; // cache
+        callback(coords, null);
+      },
+      (error) => {
+        console.warn("[GetUserLocation] Failed to get location:", error);
+        callback(null, error);
+      },
+      { enableHighAccuracy: true, timeout: 5000 }
+    );
+  }
+
   // Use cached coords if available
   if (
     !forceRefresh &&
@@ -206,7 +222,7 @@ function GetUserLocation(callback, forceRefresh = false) {
       if (perm.state === "granted") {
         callback(window.userLongLat, null);
       } else {
-        getGeo();
+        fetchGeo();
       }
     });
     return;
