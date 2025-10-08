@@ -242,7 +242,6 @@
               console.log("Attempting to prefill comment");
               const comment = getCommentFromURL();
               if (
-                winShadowRoot.querySelector("textarea") &&
                 comment &&
                 winShadowRoot
               ) {
@@ -616,6 +615,10 @@
                               #app>div.flex.flex-col.flex-grow.mt-6>div.flex.flex-col.flex-grow>div>div:has(iframe){
                                   width: 85vw !important;
                               }
+                          }
+                          #app div[role="listbox"] {
+                            height: 200px;
+                            overflow: auto;
                           }
                           #app>div.flex.flex-col.flex-grow.mt-6>div.flex.flex-col.flex-grow>div>div>div:has(iframe){
                               padding: 32px 16px;
@@ -1029,6 +1032,8 @@
                     ) {
                       hasClosedAvailDropdown = false; //if the above div dont exist and we have closed the dropdown we need to close it again
                     }
+
+
 
                     const dropdownDiv = winShadowRoot.querySelector(
                       "#app>div.flex.flex-col.flex-grow.mt-6>form>div.container.pt-6.mx-auto>div>div>div:nth-child(3)>div>div>div>div:nth-child(2)>div>div.relative.flex.items-center.justify-center.pb-2.mb-4.border-b.border-gray-300.cursor-pointer.select-none"
