@@ -85,6 +85,55 @@ window.regions_mapping = {
   },
 };
 
+document.addEventListener("DOMContentLoaded", function () {
+  appendUTMToBookingLinks();
+});
+
+function appendUTMToBookingLinks() {
+  const params = new URLSearchParams(window.location.search);
+
+  const utmKeys = [
+    "utm_source",
+    "utm_medium",
+    "utm_campaign",
+    "utm_term",
+    "utm_content",
+  ];
+  const hasUTM = utmKeys.some((k) => params.has(k));
+
+  console.log(
+    "UTM check:",
+    hasUTM ? "Found at least one UTM" : "No UTMs found in URL"
+  );
+
+  if (!hasUTM) return;
+
+  utmKeys.forEach((k) => {
+    const value = params.get(k);
+    if (value) console.log(`Found ${k}: ${value}`);
+  });
+
+  const bookingLinks = document.querySelectorAll(
+    'a[href*="/book-appointment"]'
+  );
+  console.log(`Found ${bookingLinks.length} booking link(s) to update.`);
+
+  bookingLinks.forEach((link) => {
+    const url = new URL(link.href, window.location.origin);
+
+    utmKeys.forEach((k) => {
+      const value = params.get(k);
+      if (value) {
+        url.searchParams.set(k, value);
+        console.log(`Appending ${k}=${value} to link: ${link.href}`);
+      }
+    });
+
+    link.href = url.toString();
+    console.log(`Updated link href: ${link.href}`);
+  });
+}
+
 const fetchUserLocation = async () => {
   try {
     const response = await fetch("https://geo-ip.rboone.workers.dev/");
