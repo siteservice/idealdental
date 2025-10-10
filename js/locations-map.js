@@ -85,9 +85,9 @@ window.regions_mapping = {
   },
 };
 
-document.addEventListener("DOMContentLoaded", function () {
-  appendUTMToBookingLinks();
-});
+// document.addEventListener("DOMContentLoaded", function () {
+//   appendUTMToBookingLinks();
+// });
 
 function appendUTMToBookingLinks() {
   const params = new URLSearchParams(window.location.search);
@@ -1281,6 +1281,8 @@ function mapboxLocations() {
     if (listFeature.length > 0) {
       listFeature.css("opacity", 1);
       console.log("[updateVisibleOffices] Office Cards set to opacity 1");
+
+      appendUTMToBookingLinks();
     }
 
     console.log("[updateVisibleOffices] Updated visible features");
