@@ -1,0 +1,434 @@
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KV3TTSJ" height="0" width="0"
+    style="display: none; visibility: hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+
+<script>
+  $(function () {
+    //document ready
+    if (document.querySelector("#local-navbar-container")) {
+      const locale_prepend =
+        document.getElementsByTagName("html")[0].getAttribute("lang") == "es"
+          ? "/es"
+          : "";
+      const local_home = `${locale_prepend}${$("#local-logo-link").attr(
+        "nav-link-to"
+      )}`;
+      $("#local-logo-link").attr("href", local_home);
+      $("[nav-link-to]")
+        .not("#local-logo-link")
+        .each(function () {
+          let linkto = $(this).attr("nav-link-to");
+          if ($(this).attr("query-param-value")) {
+            linkto += `?${$(this).attr("query-param-key")}=${encodeURIComponent(
+              $(this).attr("query-param-value")
+            )}`;
+          }
+          $(this).attr("href", `${local_home}/${linkto}`);
+        });
+    }
+
+    let current_path = window.location.pathname;
+    $(`a[href='${current_path}']`).addClass("active-url");
+  });
+</script>
+
+<script>
+  var scrollPositionNavSafeVarName = 0;
+  $(function () {
+    const targetNode = document.querySelector(".w-nav-overlay");
+    if (targetNode) {
+      const observer = new MutationObserver((mutationsList) => {
+        for (const mutation of mutationsList) {
+          if (
+            mutation.type === "attributes" &&
+            mutation.attributeName === "style"
+          ) {
+            const displayStyle = mutation.target.style.display;
+            if (displayStyle === "block") {
+              scrollPositionNavSafeVarName = window.scrollY;
+              setTimeout(function () {
+                $("body").addClass("no-scroll");
+              }, 500);
+            } else {
+              $("body").removeClass("no-scroll");
+              window.scrollTo(0, parseInt(scrollPositionNavSafeVarName, 10));
+            }
+          }
+        }
+      });
+
+      const config = { attributes: true, attributeFilter: ["style"] };
+      observer.observe(targetNode, config);
+    } else {
+      console.log("Element with class .w-nav-overlay not found");
+    }
+  });
+</script>
+
+<script>
+  // 🦷Homepage logo link's ARIA attributes
+  document.addEventListener("DOMContentLoaded", function () {
+    const logoLink = document.querySelector(".nav-company-logo");
+    if (logoLink) {
+      logoLink.removeAttribute("aria-current");
+      logoLink.setAttribute(
+        "aria-label",
+        "home, graphic, Ideal Dental logo, established 2008"
+      );
+    }
+  });
+</script>
+
+<script>
+  // 🦷 Footer logo link's ARIA attributes
+  document.addEventListener("DOMContentLoaded", function () {
+    const footerLogo = document.querySelector(".ideal-dental-footer-logo");
+
+    if (footerLogo) {
+      footerLogo.removeAttribute("aria-current");
+
+      footerLogo.setAttribute(
+        "aria-label",
+        "footer, graphic, Ideal Dental logo, established 2008"
+      );
+
+      if (!footerLogo.hasAttribute("tabindex")) {
+        footerLogo.setAttribute("tabindex", "0");
+      }
+    }
+  });
+</script>
+
+<script>
+  // 🦷 Scroll-to-top ARIA fix for all pages
+  document.addEventListener("DOMContentLoaded", function () {
+    function setScrollButtonAttributes() {
+      const scrollBlock = document.querySelector(".scroll-to-top");
+      if (scrollBlock) {
+        scrollBlock.setAttribute("role", "button");
+        scrollBlock.setAttribute("aria-label", "Button, back to top");
+        if (!scrollBlock.hasAttribute("tabindex")) {
+          scrollBlock.setAttribute("tabindex", "0");
+        }
+        return true;
+      }
+      return false;
+    }
+
+    const intervalId = setInterval(function () {
+      if (setScrollButtonAttributes()) {
+        clearInterval(intervalId);
+      }
+    }, 500);
+  });
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    // Ideal Dental Plan Logo
+    const idealPlanLogo = document.querySelector(".ideal-dental-plan-logo");
+    if (idealPlanLogo) {
+      idealPlanLogo.removeAttribute("aria-current");
+      idealPlanLogo.setAttribute("alt", "Graphic, Ideal Dental Plan");
+      idealPlanLogo.setAttribute("aria-label", "Graphic, Ideal Dental Plan");
+      if (!idealPlanLogo.hasAttribute("tabindex")) {
+        idealPlanLogo.setAttribute("tabindex", "0");
+      }
+    }
+
+    // CareCredit Plan Logo
+    const careCreditLogo = document.querySelector(".care-credit-plan-logo");
+    if (careCreditLogo) {
+      careCreditLogo.removeAttribute("aria-current");
+      careCreditLogo.setAttribute("alt", "Graphic, CareCredit Plan Logo");
+      careCreditLogo.setAttribute(
+        "aria-label",
+        "Graphic, CareCredit Plan Logo"
+      );
+      if (!careCreditLogo.hasAttribute("tabindex")) {
+        careCreditLogo.setAttribute("tabindex", "0");
+      }
+    }
+  });
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const ratingWrapper = document.querySelector(".rating-stars");
+    if (ratingWrapper) {
+      // Hide each individual SVG star from accessibility so they aren’t read separately
+      const stars = ratingWrapper.querySelectorAll("svg.rating-star");
+      stars.forEach(function (star) {
+        star.setAttribute("aria-hidden", "true");
+      });
+    }
+  });
+
+</script>
+
+
+
+
+
+
+
+<!--
+NEW CODE ADDED BY AKSHAY
+Purpose: To prevent recursive self-embeds and heavy duplicate asset loads.
+-->
+
+<script>
+  (function () {
+    // ---------- CONFIG ----------
+    // Origins that should load IMMEDIATELY (critical beacons/widgets needed for content)
+    // Include your domain by default so same-origin iframes are not deferred.
+    var EAGER_ORIGINS = [location.origin
+      // , 'https://offers.vendor.com'
+      // , 'https://location-api.example.com'
+    ];
+
+    // Optional: CSS selector for critical iframes you want to eager-load (by id/class/data-attr)
+    // Example: '.critical-iframe, iframe[data-critical="1"]'
+    var EAGER_SELECTOR = ''; // keep empty if you don't need it
+
+    // Max number of non-critical iframes loading simultaneously
+    var MAX_CONCURRENT = 2;
+
+    // ---------- HELPERS ----------
+    function abs(url) { try { return new URL(url, location.href); } catch { return null; } }
+    function normHref(href) {
+      try {
+        var u = new URL(href, location.href);
+        var params = new URLSearchParams(u.search);
+        var sorted = new URLSearchParams([...params.entries()].sort());
+        var path = (u.origin + u.pathname).replace(/\/+$/, '');
+        var qs = String(sorted) ? '?' + String(sorted) : '';
+        return path + qs;
+      } catch { return ''; }
+    }
+    function isHashOnly(raw) {
+      return typeof raw === 'string' && raw.trim().charAt(0) === '#' && raw.trim().length >= 1;
+    }
+    function isSamePageHref(href) {
+      if (!href) return false;
+      return normHref(href) === normHref(location.href);
+    }
+    function inViewport(el, marginPx) {
+      var r = el.getBoundingClientRect();
+      var vpH = window.innerHeight || document.documentElement.clientHeight;
+      var vpW = window.innerWidth || document.documentElement.clientWidth;
+      return (r.bottom >= -marginPx && r.top <= vpH + marginPx && r.right >= -marginPx && r.left <= vpW + marginPx);
+    }
+
+    function isCriticalIframe(ifr) {
+      if (!ifr) return false;
+      if (EAGER_SELECTOR && ifr.matches && ifr.matches(EAGER_SELECTOR)) return true;
+      if (ifr.hasAttribute('srcdoc')) return true; // keep vendor srcdoc chat bubbles, etc.
+
+      var raw = ifr.getAttribute('src');
+      if (!raw) return false; // will be set later; treat as non-critical until src exists
+      var u = abs(raw);
+      if (!u) return false;
+
+      // Treat listed origins (including your own) as critical
+      return EAGER_ORIGINS.indexOf(u.origin) !== -1;
+    }
+
+    // ---------- MAIN ----------
+    var all = Array.from(document.getElementsByTagName('iframe'));
+    var queueHigh = [], queueMed = [], queueLow = [];
+    var preloadOrigins = [];
+    var active = 0;
+
+    // 1) Stage only NON-CRITICAL iframes; leave critical ones untouched
+    all.forEach(function (ifr) {
+      // Never modify srcdoc iframes
+      if (ifr.hasAttribute('srcdoc')) return;
+
+      var raw = ifr.getAttribute('src');
+      if (!raw) return; // nothing to do yet
+
+      // Skip obviously bad sources
+      if (isHashOnly(raw)) return;                 // don't load '#'
+      var u = abs(raw);
+      if (u && isSamePageHref(u.href)) return;     // don't load same page URL
+
+      // Critical? Leave it as-is (eager load)
+      if (isCriticalIframe(ifr)) {
+        if (u && u.origin !== location.origin) preloadOrigins.push(u.origin);
+        return;
+      }
+
+      // Non-critical → defer: move src->data-src
+      if (u && u.origin !== location.origin) preloadOrigins.push(u.origin);
+      ifr.setAttribute('data-src', raw);
+      ifr.removeAttribute('src');
+
+      // Prevent layout thrash for beacons
+      if (!ifr.style.width) ifr.style.width = '1px';
+      if (!ifr.style.height) ifr.style.height = '1px';
+      if (!ifr.style.display) ifr.style.display = 'block';
+      ifr.style.contain = 'content';
+      ifr.setAttribute('loading', 'lazy');
+      ifr.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
+    });
+
+    // 2) Preconnect to third-party origins for faster handshakes
+    Array.from(new Set(preloadOrigins)).slice(0, 10).forEach(function (origin) {
+      var link = document.createElement('link');
+      link.rel = 'preconnect';
+      link.href = origin;
+      link.crossOrigin = '';
+      document.head.appendChild(link);
+    });
+
+    // 3) Build queues only from staged (non-critical) iframes
+    Array.from(document.querySelectorAll('iframe[data-src]')).forEach(function (ifr) {
+      if (inViewport(ifr, 400)) queueHigh.push(ifr);
+      else if (inViewport(ifr, 1200)) queueMed.push(ifr);
+      else queueLow.push(ifr);
+    });
+
+    function loadOne(ifr) {
+      if (!ifr || ifr.dataset.loaded === '1') return;
+      var src = ifr.getAttribute('data-src');
+      if (!src) return;
+
+      // Safety check at load time
+      if (isHashOnly(src)) return;
+      var u = abs(src);
+      if (u && isSamePageHref(u.href)) return;
+
+      active++;
+      ifr.dataset.loaded = '1';
+      ifr.src = src;
+      var done = function () { active = Math.max(0, active - 1); pump(); };
+      ifr.addEventListener('load', done, { once: true });
+      ifr.addEventListener('error', done, { once: true });
+    }
+
+    function pump() {
+      if (active >= MAX_CONCURRENT) return;
+      var next = queueHigh.shift() || queueMed.shift() || queueLow.shift();
+      if (next) { loadOne(next); pump(); }
+    }
+
+    // Start staged loads
+    pump();
+
+    // Promote on intersection
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (!e.isIntersecting) return;
+          var el = e.target;
+          if (el.dataset && el.dataset.loaded !== '1') {
+            queueHigh.unshift(el);
+            pump();
+          }
+          io.unobserve(el);
+        });
+      }, { rootMargin: '300px' });
+
+      document.querySelectorAll('iframe[data-src]').forEach(function (ifr) {
+        io.observe(ifr);
+      });
+    }
+
+    // Idle loader for leftovers
+    function loadRemainingIdle() {
+      var idle = window.requestIdleCallback || function (fn) { return setTimeout(fn, 150); };
+      function step() {
+        if (!queueHigh.length && !queueMed.length && !queueLow.length) return;
+        if (active < MAX_CONCURRENT) {
+          var next = queueHigh.shift() || queueMed.shift() || queueLow.shift();
+          if (next) loadOne(next);
+        }
+        idle(step, { timeout: 2000 });
+      }
+      idle(step, { timeout: 2000 });
+    }
+    setTimeout(loadRemainingIdle, 2000);
+
+    // 4) Handle dynamically added iframes (same rules)
+    new MutationObserver(function (muts) {
+      muts.forEach(function (m) {
+        m.addedNodes.forEach(function (n) {
+          if (!n) return;
+
+          if (n.tagName === 'IFRAME') {
+            // Critical? leave; Non-critical? stage
+            if (!n.hasAttribute('srcdoc')) {
+              var raw = n.getAttribute('src');
+              if (raw && !isHashOnly(raw)) {
+                var u = abs(raw);
+                if (u && !isSamePageHref(u.href)) {
+                  if (isCriticalIframe(n)) {
+                    if (u.origin !== location.origin) {
+                      var link = document.createElement('link');
+                      link.rel = 'preconnect';
+                      link.href = u.origin; link.crossOrigin = ''; document.head.appendChild(link);
+                    }
+                  } else {
+                    n.setAttribute('data-src', raw);
+                    n.removeAttribute('src');
+                    if (!n.style.width) n.style.width = '1px';
+                    if (!n.style.height) n.style.height = '1px';
+                    if (!n.style.display) n.style.display = 'block';
+                    n.style.contain = 'content';
+                    n.setAttribute('loading', 'lazy');
+                    n.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
+                    (inViewport(n, 400) ? queueHigh : inViewport(n, 1200) ? queueMed : queueLow).push(n);
+                    pump();
+                  }
+                }
+              }
+            }
+          } else if (n.querySelectorAll) {
+            n.querySelectorAll('iframe').forEach(function (ifr) {
+              // Re-run same logic for descendants
+              if (ifr.hasAttribute('srcdoc')) return;
+              var raw = ifr.getAttribute('src');
+              if (!raw || isHashOnly(raw)) return;
+              var u = abs(raw);
+              if (u && isSamePageHref(u.href)) return;
+
+              if (isCriticalIframe(ifr)) {
+                if (u && u.origin !== location.origin) {
+                  var link = document.createElement('link');
+                  link.rel = 'preconnect'; link.href = u.origin; link.crossOrigin = ''; document.head.appendChild(link);
+                }
+              } else {
+                ifr.setAttribute('data-src', raw);
+                ifr.removeAttribute('src');
+                if (!ifr.style.width) ifr.style.width = '1px';
+                if (!ifr.style.height) ifr.style.height = '1px';
+                if (!ifr.style.display) ifr.style.display = 'block';
+                ifr.style.contain = 'content';
+                ifr.setAttribute('loading', 'lazy');
+                ifr.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
+                (inViewport(ifr, 400) ? queueHigh : inViewport(ifr, 1200) ? queueMed : queueLow).push(ifr);
+                pump();
+              }
+            });
+          }
+        });
+      });
+    }).observe(document.documentElement, { childList: true, subtree: true });
+  })();
+</script>
+<script>
+  (function () {
+    // Allow explicit embeds: add ?embed=1 to the iframe src where you *do* want it to load
+    var allow = new URLSearchParams(location.search).get('embed') === '1';
+
+    if (!allow && window.top !== window.self) {
+      // Inside any iframe -> abort loading this document
+      try { window.stop(); } catch (e) { }
+      try { document.documentElement.innerHTML = ''; } catch (e) { }
+      return;
+    }
+
+  })();
+</script>
