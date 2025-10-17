@@ -63,7 +63,7 @@ window.regions_mapping = {
     inputValue: "San Antonio, TX, USA",
     regionCoordinates: [-98.5986018, 29.4315263], //[-98.5420483, 29.4360571],//[-98.4936, 29.4241],
     forceCoordinates: true,
-    zoomLevel: 11,
+    zoomLevel: 10,
   },
   seattle: {
     inputValue: "Seattle, WA, USA",
