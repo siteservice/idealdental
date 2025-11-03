@@ -1,0 +1,258 @@
+<script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/js/splide.min.js"></script>
+<script>
+    // Global variable for dentist slider instance
+    window.ourdentists_slider = window.ourdentists_slider || null;
+
+    window.onmessage = (event) => {
+        if (event.source.insuranceLogoPaths) {
+            for (const insurance of event.source.insuranceLogoPaths) {
+                $("#insurances-logo-wrapper").append(
+                    `<div class="solutions-splide-slide splide__slide">
+               <img class="solutions-slide-img" src="${insurance.path}" alt="${insurance.name}">
+             </div>`
+                );
+            }
+
+
+            var affordability_slider = new Splide('.solutions-splide', {
+                type: 'loop',
+                drag: false,
+                focus: 'center',
+                arrows: false,
+                pagination: false,
+                perPage: 1,
+                autoHeight: true,
+                autoWidth: true,
+                autoplay: false,       // we'll roll our own
+                gap: '40px',
+                breakpoints: {
+                    991: { gap: '32px' },
+                    640: { gap: '24px' },
+                },
+            });
+
+            affordability_slider.mount();
+
+            // ---- Continuous scroller (no reads in the hot loop) ----
+            (function makeContinuousScroll(instance, pxPerSec) {
+                const list = instance.Components.Elements.list;
+                const track = instance.Components.Elements.track;
+
+                // One-time reads (sizes); re-measure on resize only
+                let trackW = 0, listW = 0, needMeasure = true;
+                function measure() {
+                    const tr = track.getBoundingClientRect();
+                    const lr = list.getBoundingClientRect();
+                    trackW = tr.width;
+                    listW = lr.width;
+                    needMeasure = false;
+                }
+                measure();
+                addEventListener('resize', () => { needMeasure = true; });
+
+                // Ensure GPU path
+                list.style.willChange = 'transform';
+
+                let raf = 0, lastT = 0, x = 0;
+                const speed = Math.max(10, pxPerSec || 200); // pixels per second (adjust!)
+
+                function loop(t) {
+                    if (!lastT) lastT = t;
+                    if (needMeasure) measure();
+
+                    const dt = Math.min(32, t - lastT); // clamp for tab switches
+                    lastT = t;
+
+                    // WRITE ONLY: translate left by speed
+                    x -= (speed * dt) / 1000;
+
+                    // Simple wrap when we’ve scrolled past the list end
+                    const maxScroll = Math.max(0, listW - trackW);
+                    if (maxScroll > 0 && -x > maxScroll) x = 0;
+
+                    list.style.transform = `translate3d(${x}px,0,0)`;
+                    raf = requestAnimationFrame(loop);
+                }
+
+                // Pause/resume when off-screen
+                const obs = new IntersectionObserver(([e]) => {
+                    if (e.isIntersecting) {
+                        if (!raf) { lastT = 0; raf = requestAnimationFrame(loop); }
+                    } else {
+                        if (raf) { cancelAnimationFrame(raf); raf = 0; }
+                    }
+                }, { threshold: 0.05 });
+
+                obs.observe(instance.root);
+
+                // Optional: pause on hover (like autoScroll)
+                instance.root.addEventListener('mouseenter', () => { if (raf) { cancelAnimationFrame(raf); raf = 0; } });
+                instance.root.addEventListener('mouseleave', () => { if (!raf) { lastT = 0; raf = requestAnimationFrame(loop); } });
+
+            })(affordability_slider, 220);
+
+
+
+        }
+
+        if (event.source.dentists) {
+            $(".our-dentist-splide-list").empty();
+            for (const dentist of event.source.dentists) {
+                let style_role = "";
+                if (dentist.role == "") {
+                    style_role = 'style="display:none;"';
+                }
+                $(".our-dentist-splide-list").append(
+                    `<div class="card-our-dentitst splide__slide card-our-dentist-slide w-dyn-item" data-name="${dentist.name}" >
+               <div class="our-dentist-picture">
+                 <img src="${dentist.picture}" class="image-3" alt="Dentist-Profile">
+               </div>
+               <h3 class="dentist-name">${dentist.name}</h3>
+               <div class="dentist-role" ${style_role}>${dentist.role}</div>
+             </div>`
+                );
+            }
+
+            $(document).on('click', '.card-our-dentitst', function () {
+                const slug = this.getAttribute('data-name') || '';
+                window.location.href = window.location.href + "/our-dentists#" + slug;
+            });
+
+
+
+            // If an instance already exists, destroy it first to avoid duplication.
+            if (window.ourdentists_slider) {
+                window.ourdentists_slider.destroy();
+                window.ourdentists_slider = null;
+            }
+
+            // Create a new instance without the top-level destroy option.
+            window.ourdentists_slider = new Splide('.dentists-splide', {
+                perPage: 5,
+                breakpoints: {
+                    1024: {
+                        destroy: false,
+                        pagination: true,
+                        arrows: false,
+                        perPage: 5,
+                        gap: '20px'
+                    },
+                    767: {
+                        destroy: false,
+                        pagination: true,
+                        arrows: false,
+                        perPage: 2,
+                        gap: '16px'
+                    }
+                }
+            });
+
+            try {
+                window.ourdentists_slider.mount();
+            }
+            catch (error) {
+                console.log("No dentists for now");
+            }
+        }
+    }
+
+    $(document).ready(function () {
+
+        var cards_slide = new Splide('.location-about-cards-splide', {
+            //type : 'slide',
+            //drag : false, //'free'
+            //focus : 'center',
+            arrows: false,
+            pagination: true,
+            perPage: 2,
+            //autoHeight:false,
+            //autoWidth:false,
+            //gap : '40px',
+            destroy: true,
+            breakpoints: {
+                767: {
+                    destroy: false,
+                    gap: '16px',
+                    perPage: 2,
+                }
+            },
+        });
+        cards_slide.mount();
+
+        /*var services_slider = new Splide('.services-accordion-splide',{
+          destroy : true,
+          breakpoints:{
+            991 :{
+              destroy : false,
+              pagination : true,
+              arrows : false,
+              perPage : 1,
+              gap : '20px',
+              //padding: '5rem',
+            },
+          }
+        });
+        services_slider.mount();
+        */
+        const viewportWidth = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+        if (viewportWidth < 767) {
+            $(".solution-card._3rd").remove();
+        }
+        var solutions_slider = new Splide('.solutions-splide-main', {
+            destroy: true,
+            breakpoints: {
+                767: {
+                    destroy: false,
+                    pagination: true,
+                    arrows: false,
+                    perPage: 1,
+                    gap: '20px',
+                    //padding: '5rem',
+                },
+            }
+        });
+        solutions_slider.mount();
+
+        $(".day-schedule-container:contains('Closed')>div:last-child").css("color", "#B7BCC2");
+        /*var schedule_slide = new Splide( '.schedule_spide_vertical', {
+          direction: 'ttb',
+          height   : '24px',
+          autoplay: true,
+          type : 'loop',
+          arrows : false,
+          pagination : false
+        });
+        schedule_slide.mount();
+        */
+        const currentDate = new Date();
+        const currentWeekday = new Intl.DateTimeFormat('en-US', { weekday: 'long' }).format(currentDate);
+        $(`[schedule-for='${currentWeekday}']`).css("display", "flex");
+    });
+</script>
+<!--script>
+  // JSON Schema injection
+  document.addEventListener("DOMContentLoaded", function () {
+    let structured_data_raw = ``;
+
+    if (structured_data_raw.length > 0) {
+      function unEscape(htmlStr) {
+        htmlStr = htmlStr.replace(/&lt;/g, "<");
+        htmlStr = htmlStr.replace(/&gt;/g, ">");
+        htmlStr = htmlStr.replace(/&quot;/g, '"');
+        htmlStr = htmlStr.replace(/&#39;/g, "'");
+        htmlStr = htmlStr.replace(/&amp;/g, "&");
+        return htmlStr;
+      }
+
+      let structured_data = JSON.parse(unEscape(structured_data_raw));
+
+      const script = document.createElement("script");
+      script.type = "application/ld+json";
+      script.innerHTML = JSON.stringify(structured_data, null, 2);
+
+      document.head.appendChild(script);
+    } else {
+      console.log("no schema provided");
+    }
+  });
+</script-->

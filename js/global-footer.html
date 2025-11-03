@@ -177,258 +177,74 @@
 NEW CODE ADDED BY AKSHAY
 Purpose: To prevent recursive self-embeds and heavy duplicate asset loads.
 -->
-
 <script>
   (function () {
-    // ---------- CONFIG ----------
-    // Origins that should load IMMEDIATELY (critical beacons/widgets needed for content)
-    // Include your domain by default so same-origin iframes are not deferred.
-    var EAGER_ORIGINS = [location.origin
-      // , 'https://offers.vendor.com'
-      // , 'https://location-api.example.com'
-    ];
+    function removeNestedIframes() {
+      // Run only when this document itself is inside an iframe
+      let inFrame = true;
+      try { inFrame = window.self !== window.top; } catch (_) { inFrame = true; }
+      if (!inFrame) return;
 
-    // Optional: CSS selector for critical iframes you want to eager-load (by id/class/data-attr)
-    // Example: '.critical-iframe, iframe[data-critical="1"]'
-    var EAGER_SELECTOR = ''; // keep empty if you don't need it
-
-    // Max number of non-critical iframes loading simultaneously
-    var MAX_CONCURRENT = 2;
-
-    // ---------- HELPERS ----------
-    function abs(url) { try { return new URL(url, location.href); } catch { return null; } }
-    function normHref(href) {
-      try {
-        var u = new URL(href, location.href);
-        var params = new URLSearchParams(u.search);
-        var sorted = new URLSearchParams([...params.entries()].sort());
-        var path = (u.origin + u.pathname).replace(/\/+$/, '');
-        var qs = String(sorted) ? '?' + String(sorted) : '';
-        return path + qs;
-      } catch { return ''; }
-    }
-    function isHashOnly(raw) {
-      return typeof raw === 'string' && raw.trim().charAt(0) === '#' && raw.trim().length >= 1;
-    }
-    function isSamePageHref(href) {
-      if (!href) return false;
-      return normHref(href) === normHref(location.href);
-    }
-    function inViewport(el, marginPx) {
-      var r = el.getBoundingClientRect();
-      var vpH = window.innerHeight || document.documentElement.clientHeight;
-      var vpW = window.innerWidth || document.documentElement.clientWidth;
-      return (r.bottom >= -marginPx && r.top <= vpH + marginPx && r.right >= -marginPx && r.left <= vpW + marginPx);
-    }
-
-    function isCriticalIframe(ifr) {
-      if (!ifr) return false;
-      if (EAGER_SELECTOR && ifr.matches && ifr.matches(EAGER_SELECTOR)) return true;
-      if (ifr.hasAttribute('srcdoc')) return true; // keep vendor srcdoc chat bubbles, etc.
-
-      var raw = ifr.getAttribute('src');
-      if (!raw) return false; // will be set later; treat as non-critical until src exists
-      var u = abs(raw);
-      if (!u) return false;
-
-      // Treat listed origins (including your own) as critical
-      return EAGER_ORIGINS.indexOf(u.origin) !== -1;
-    }
-
-    // ---------- MAIN ----------
-    var all = Array.from(document.getElementsByTagName('iframe'));
-    var queueHigh = [], queueMed = [], queueLow = [];
-    var preloadOrigins = [];
-    var active = 0;
-
-    // 1) Stage only NON-CRITICAL iframes; leave critical ones untouched
-    all.forEach(function (ifr) {
-      // Never modify srcdoc iframes
-      if (ifr.hasAttribute('srcdoc')) return;
-
-      var raw = ifr.getAttribute('src');
-      if (!raw) return; // nothing to do yet
-
-      // Skip obviously bad sources
-      if (isHashOnly(raw)) return;                 // don't load '#'
-      var u = abs(raw);
-      if (u && isSamePageHref(u.href)) return;     // don't load same page URL
-
-      // Critical? Leave it as-is (eager load)
-      if (isCriticalIframe(ifr)) {
-        if (u && u.origin !== location.origin) preloadOrigins.push(u.origin);
-        return;
-      }
-
-      // Non-critical → defer: move src->data-src
-      if (u && u.origin !== location.origin) preloadOrigins.push(u.origin);
-      ifr.setAttribute('data-src', raw);
-      ifr.removeAttribute('src');
-
-      // Prevent layout thrash for beacons
-      if (!ifr.style.width) ifr.style.width = '1px';
-      if (!ifr.style.height) ifr.style.height = '1px';
-      if (!ifr.style.display) ifr.style.display = 'block';
-      ifr.style.contain = 'content';
-      ifr.setAttribute('loading', 'lazy');
-      ifr.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
-    });
-
-    // 2) Preconnect to third-party origins for faster handshakes
-    Array.from(new Set(preloadOrigins)).slice(0, 10).forEach(function (origin) {
-      var link = document.createElement('link');
-      link.rel = 'preconnect';
-      link.href = origin;
-      link.crossOrigin = '';
-      document.head.appendChild(link);
-    });
-
-    // 3) Build queues only from staged (non-critical) iframes
-    Array.from(document.querySelectorAll('iframe[data-src]')).forEach(function (ifr) {
-      if (inViewport(ifr, 400)) queueHigh.push(ifr);
-      else if (inViewport(ifr, 1200)) queueMed.push(ifr);
-      else queueLow.push(ifr);
-    });
-
-    function loadOne(ifr) {
-      if (!ifr || ifr.dataset.loaded === '1') return;
-      var src = ifr.getAttribute('data-src');
-      if (!src) return;
-
-      // Safety check at load time
-      if (isHashOnly(src)) return;
-      var u = abs(src);
-      if (u && isSamePageHref(u.href)) return;
-
-      active++;
-      ifr.dataset.loaded = '1';
-      ifr.src = src;
-      var done = function () { active = Math.max(0, active - 1); pump(); };
-      ifr.addEventListener('load', done, { once: true });
-      ifr.addEventListener('error', done, { once: true });
-    }
-
-    function pump() {
-      if (active >= MAX_CONCURRENT) return;
-      var next = queueHigh.shift() || queueMed.shift() || queueLow.shift();
-      if (next) { loadOne(next); pump(); }
-    }
-
-    // Start staged loads
-    pump();
-
-    // Promote on intersection
-    if ('IntersectionObserver' in window) {
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
-          if (!e.isIntersecting) return;
-          var el = e.target;
-          if (el.dataset && el.dataset.loaded !== '1') {
-            queueHigh.unshift(el);
-            pump();
-          }
-          io.unobserve(el);
-        });
-      }, { rootMargin: '300px' });
-
-      document.querySelectorAll('iframe[data-src]').forEach(function (ifr) {
-        io.observe(ifr);
-      });
-    }
-
-    // Idle loader for leftovers
-    function loadRemainingIdle() {
-      var idle = window.requestIdleCallback || function (fn) { return setTimeout(fn, 150); };
-      function step() {
-        if (!queueHigh.length && !queueMed.length && !queueLow.length) return;
-        if (active < MAX_CONCURRENT) {
-          var next = queueHigh.shift() || queueMed.shift() || queueLow.shift();
-          if (next) loadOne(next);
+      function kill(nodeListOrArray) {
+        for (const el of nodeListOrArray) {
+          try {
+            if (el.contentWindow && typeof el.contentWindow.stop === 'function') {
+              el.contentWindow.stop(); // cancel if already loading (same-origin)
+            }
+          } catch (_) { }
+          try {
+            el.removeAttribute('src');
+            el.removeAttribute('srcdoc');
+          } catch (_) { }
+          if (el.parentNode) el.parentNode.removeChild(el);
         }
-        idle(step, { timeout: 2000 });
       }
-      idle(step, { timeout: 2000 });
-    }
-    setTimeout(loadRemainingIdle, 2000);
 
-    // 4) Handle dynamically added iframes (same rules)
-    new MutationObserver(function (muts) {
-      muts.forEach(function (m) {
-        m.addedNodes.forEach(function (n) {
-          if (!n) return;
+      // Remove any iframes already in the DOM
+      kill(document.querySelectorAll('iframe'));
 
-          if (n.tagName === 'IFRAME') {
-            // Critical? leave; Non-critical? stage
-            if (!n.hasAttribute('srcdoc')) {
-              var raw = n.getAttribute('src');
-              if (raw && !isHashOnly(raw)) {
-                var u = abs(raw);
-                if (u && !isSamePageHref(u.href)) {
-                  if (isCriticalIframe(n)) {
-                    if (u.origin !== location.origin) {
-                      var link = document.createElement('link');
-                      link.rel = 'preconnect';
-                      link.href = u.origin; link.crossOrigin = ''; document.head.appendChild(link);
-                    }
-                  } else {
-                    n.setAttribute('data-src', raw);
-                    n.removeAttribute('src');
-                    if (!n.style.width) n.style.width = '1px';
-                    if (!n.style.height) n.style.height = '1px';
-                    if (!n.style.display) n.style.display = 'block';
-                    n.style.contain = 'content';
-                    n.setAttribute('loading', 'lazy');
-                    n.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
-                    (inViewport(n, 400) ? queueHigh : inViewport(n, 1200) ? queueMed : queueLow).push(n);
-                    pump();
-                  }
+      // Watch for future iframes or src changes and remove them immediately
+      const mo = new MutationObserver((mutations) => {
+        for (const m of mutations) {
+          // Handle newly added nodes
+          if (m.addedNodes && m.addedNodes.length) {
+            for (const node of m.addedNodes) {
+              if (node && node.nodeType === 1) { // element nodes only
+                if (node.tagName && node.tagName.toLowerCase() === 'iframe') {
+                  kill([node]);
+                } else if (node.querySelectorAll) {
+                  const innerIframes = node.querySelectorAll('iframe');
+                  if (innerIframes.length) kill(innerIframes);
                 }
               }
             }
-          } else if (n.querySelectorAll) {
-            n.querySelectorAll('iframe').forEach(function (ifr) {
-              // Re-run same logic for descendants
-              if (ifr.hasAttribute('srcdoc')) return;
-              var raw = ifr.getAttribute('src');
-              if (!raw || isHashOnly(raw)) return;
-              var u = abs(raw);
-              if (u && isSamePageHref(u.href)) return;
-
-              if (isCriticalIframe(ifr)) {
-                if (u && u.origin !== location.origin) {
-                  var link = document.createElement('link');
-                  link.rel = 'preconnect'; link.href = u.origin; link.crossOrigin = ''; document.head.appendChild(link);
-                }
-              } else {
-                ifr.setAttribute('data-src', raw);
-                ifr.removeAttribute('src');
-                if (!ifr.style.width) ifr.style.width = '1px';
-                if (!ifr.style.height) ifr.style.height = '1px';
-                if (!ifr.style.display) ifr.style.display = 'block';
-                ifr.style.contain = 'content';
-                ifr.setAttribute('loading', 'lazy');
-                ifr.setAttribute('referrerpolicy', 'no-referrer-when-downgrade');
-                (inViewport(ifr, 400) ? queueHigh : inViewport(ifr, 1200) ? queueMed : queueLow).push(ifr);
-                pump();
-              }
-            });
           }
-        });
+          // If an existing iframe's src changes, remove it
+          if (
+            m.type === 'attributes' &&
+            m.attributeName === 'src' &&
+            m.target &&
+            m.target.tagName &&
+            m.target.tagName.toLowerCase() === 'iframe'
+          ) {
+            kill([m.target]);
+          }
+        }
       });
-    }).observe(document.documentElement, { childList: true, subtree: true });
-  })();
-</script>
-<script>
-  (function () {
-    // Allow explicit embeds: add ?embed=1 to the iframe src where you *do* want it to load
-    var allow = new URLSearchParams(location.search).get('embed') === '1';
 
-    if (!allow && window.top !== window.self) {
-      // Inside any iframe -> abort loading this document
-      try { window.stop(); } catch (e) { }
-      try { document.documentElement.innerHTML = ''; } catch (e) { }
-      return;
+      mo.observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['src']
+      });
     }
 
+    // Run ASAP
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', removeNestedIframes, { once: true });
+    } else {
+      removeNestedIframes();
+    }
   })();
 </script>
